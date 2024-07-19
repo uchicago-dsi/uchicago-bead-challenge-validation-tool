@@ -34,6 +34,10 @@ dev = [
 [project.scripts]
 bead_inspector = "bead_inspector.main:main"
 
+[project.urls]
+Homepage = "https://github.com/uchicago-dsi/uchicago-bead-challenge-validation-tool"
+Issues = "https://github.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/issues"
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 packages = ["bead_inspector"]
