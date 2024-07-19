@@ -1,5 +1,6 @@
+<br/><br/>
 <p align="center">
-<img src="./images/DSILogo.png" alt="UChicago Logo" width="600" class="center"/>
+<img src="./images/DSILogo.png" alt="UChicago Logo" width="600"/>
 </p>
 <br/><br/>
 
