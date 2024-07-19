@@ -47,7 +47,7 @@ class ReportGenerator:
         report_file_name = re.sub(r"\.json$", ".html", issue_file_name)
         report_file_name = re.sub(
             r"^validation_issue_logs",
-            "BEAD_Data_Validation_Report_",
+            "BEAD_Data_Validation_Report",
             report_file_name,
         )
         report_file_path = self.report_dir.joinpath(report_file_name)
