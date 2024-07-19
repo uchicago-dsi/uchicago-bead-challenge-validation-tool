@@ -81,7 +81,7 @@ This package can be installed via python's package manager, pip, by typing `pip 
 
 3. Note that running the command may take a few minutes, depending on the size of the files.
 4. Once the command is complete two files will be generated:
-    1. `path_to_files/reports/validation_issue_logs_{DATE}_{TIME}.html`
+    1. `path_to_files/reports/BEAD_Data_Validation_Report_{DATE}_{TIME}.html`
     2. `path_to_files/logs/validation_issue_logs_{DATE}_{TIME}.json`
 
 The `html` file in the `reports` subdirectory is a human readable version of the report. For most users this is the file that should be used to evaluate the quality of the reports. The `json` file is presented in case you wish to programatically interpret the resulting files.
