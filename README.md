@@ -92,6 +92,10 @@ TODO
 
 ## FAQ
 
+| Where does the report go? Does the NTIA see this? What about UChicago? |
+| --- | 
+| NOPE! You can look at the code in this repository and see that nothing is reported to NTIA or the University of Chicago. This is simply a tool to identify potential problems. | 
+
 | What if I only want to have _some_ of the files to check? |
 | --- | 
 | BEAD Inspector only checks the files which are present in the target directory that following the NTIA file naming conventions. If a file is missing a warning will be issued, but the tool will check all present files |
