@@ -50,6 +50,7 @@ def x_can_be_null_given_challenge_type_validator(
 
 class ChallengersISPProviderIdRuleValidator:
     rule_descr = "Broadband Providers must have FCC Provider ID."
+    short_descr = "Required provider_id values are missing"
     category_index: int = 2
     provider_id_index: int = 5
 

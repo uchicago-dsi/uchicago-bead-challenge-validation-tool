@@ -331,7 +331,7 @@ class ReportGenerator:
             class_name=validation,
         )
         rule_descr = validator_attrs["rule_descr"]
-        short_descr = validator_attrs["short_descr"]
+        short_descr = validator_attrs.get("short_descr", None)
         col_indexes = {
             c.replace("_index", ""): i
             for c, i in filter(
