@@ -1,5 +1,6 @@
+<p align="center">
 <img src="./images/DSILogo.png" alt="UChicago Logo" width="600" class="center"/>
-
+</p>
 <br/><br/>
 
 # BEAD INSPECTOR
