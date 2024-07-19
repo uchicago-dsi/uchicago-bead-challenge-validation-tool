@@ -1,6 +1,6 @@
 # BEAD INSPECTOR
 
-<img src="./images/DSILogo.png" alt="drawing" width="600"/>
+<img src="./images/DSILogo.png" alt="UChicago Logo" width="600"/>
 
 Welcome to the BEAD Inspector, presented by the [University of Chicago's Data Science Institute](https://datascience.uchicago.edu/).
 
