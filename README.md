@@ -168,7 +168,7 @@ When a report is generated there are three sections:
 
 | Some of the issues seem to duplicate, why? |
 | --- | 
-| Some of the checks that we have in place do 
+| Some of the checks that we have in place do overlap with other issues. Missing and nulls, for example, can run afoul of multiple NTIA rules.
 
 | What if I only want to have _some_ of the files to check? |
 | --- | 
