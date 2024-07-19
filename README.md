@@ -26,7 +26,7 @@ This package requires knowledge of the command line and a computer installed wit
 
 ## What this package checks
 
-This package focuses on a set of data quality issues that are easy to overlook when submitting your challenge results. This package will check the following files for the following issues
+This package focuses on a set of data quality issues that are easy to overlook when submitting your challenge results. This package will check the following files for the following issues:
 
 <table>
 
@@ -57,7 +57,7 @@ This package focuses on a set of data quality issues that are easy to overlook w
 
 ## What this package does _not_ check
 
-1. **Availability / Fabric Validation:** This package does not check locations against the Fabric or FCC Availability Data.
+1. **Availability / Fabric Validation:** This package does not check locations against the FCC Fabric or FCC Availability Data.
 2. **Correctness of open text fields:** There are a number of open text fields (such as `resolution` in the `challenges.csv` file. BEAD INSPECTOR checks to make sure that these fields are not empty, but does not check to verify the correctness of the content.
 
 ## Using BEAD Inspector
@@ -66,7 +66,7 @@ This python package is installed via `pip` and can be used directly from the com
 
 #### Pre-requisites
 
-Make sure that you computer has access to Python and Pip. You can do this by going to the command line and typing `pip --version` and `python --version`. Both of these should return version numbers. The Python version needs to be greater than 3.7. As with all third part packages, we recommend using a [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) when using, but it is not required.
+Make sure that you computer has access to Python and Pip. You can do this by going to the command line and typing `pip --version` and `python --version`. Both of these should return version numbers. The Python version needs to be greater than 3.7. As with all third party packages, we recommend using a [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/), but it is not required.
 
 #### Installation
 
@@ -74,7 +74,7 @@ This package can be installed via python's package manager, pip, by typing `pip 
 
 #### Creating a Report
 
-1. Put all files that you wish to have checked in a single directory, noting the location. _Make sure that all filenames conform to the NTIA standard filenames._ If you wish to only check a subset of the files then put that subset inside the directory. Bead Inspector will only analyze those files that it finds in the specified location.
+1. Put all files that you wish to have checked in a single directory, noting the location. _Make sure that all filenames conform to the NTIA standard filenames._ If you wish to only check a subset of the files, put that subset inside the directory. Bead Inspector will only analyze files that it finds in the specified location. [See here for NTIA standards](https://broadbandusa.ntia.gov/sites/default/files/2024-03/BEAD_Challenge_Process_Data_Submission_-_Data_Quality_File_Formats_and_Common_Issues.pdf)
 2. Once files are copied, enter the following at the command line, making sure to put a full path location.
 
     `> bead_inspector /path_to_files`
@@ -91,7 +91,7 @@ The `html` file in the `reports` subdirectory is a human readable version of the
 Within our report we denote two different levels of checks:
 
 1. **Errors**: Checks which are errors are extremely likely to need to be fixed before submission. Examples of this would include required fields missing, etc.
-2. **Info**: Our Info level are checks which may or may not need to be fixed, depending on the circumstances of your submissions. For example if an eligible entity has submitted area challenges then, per NOTCP 07/002, the `challenger` field in the `challenges.csv` file should be left empty, which is in contrast to the original policy notice. As such we generate an "Info" level issue as this _may_ need to be fixed depending on the specific challenge.
+2. **Info**: Our Info level are checks which may or may not need to be fixed, depending on the circumstances of your submissions. For example if an eligible entity has submitted area challenges then, per NOTCP 07/002, the `challenger` field in the `challenges.csv` file should be left empty, which is in contrast to the original policy notice. As such we generate an "Info" level issue as this _may_ need to be fixed depending on the specific challenge requirements for your state.
 
 When a report is generated there are three sections:
 
@@ -128,7 +128,7 @@ When a report is generated there are three sections:
 </p>
 </td>
 <td>
-<p>The Table of Contents contains a list of links to specific issues that were found. They are organized by the level of the issue found (Info / Error). They are numbered, in order, starting from one and the issue name is of the format:</p>
+<p>The Table of Contents contains a list with links to specific issues found, organized by the level of the issue found (Info / Error). They are numbered, in order, starting from one and the issue name is of the format:</p>
 
 <p>{File where issue was found} :: Name of Issue :: [Optional: Type of Issue]</p>
 
@@ -150,11 +150,11 @@ When a report is generated there are three sections:
 <td>
 <p>Detailed information regarding the specific issue can be found in this section. There are a few new fields that were not previously discussed:</p>
 <ul>
-<li><b>Description:</b> This is a longer description of the problem encountered.</li>
-<li><b>Column:</b> Which column in the CSV this issue applies to.</li>
-<li><b>Failing Rows:</b> Values in the rows which are failing.</li>
-<li><b>Total Rows with Invalid Values:</b> Total number of rows which failed.</li>
-<li><b>All Rows Shown:</b> We only show the first few invalid values. In the case where there are many broken values this will indicate if all failures are shown or not.</li>
+<li><b>Description:</b> This lists a description of the problem encountered.</li>
+<li><b>Column:</b> Displays the specific column in the CSV where this issue applies.</li>
+<li><b>Failing Rows:</b> Lists the failed values by row.</li>
+<li><b>Total Rows with Invalid Values:</b> Identifies the total number of rows with failing values.</li>
+<li><b>All Rows Shown:</b> BEAD Inspector displays the first few invalid values. In the case where there are many broken values this will indicate if all failures are shown or not.</li>
 </ul>
 </td>
 </tr>
@@ -172,7 +172,7 @@ When a report is generated there are three sections:
 
 | What if I only want to have _some_ of the files to check? |
 | --- | 
-| BEAD Inspector only checks the files which are present in the target directory that following the NTIA file naming conventions. If a file is missing a warning will be issued, but the tool will check all present files |
+| BEAD Inspector only checks the files which 1) are present in the target directory that 2) follow the NTIA file naming conventions. If a file is missing, a warning will be issued, but the tool will check all files present in the target directory |
 
 | There is a rule that I think BEAD Inspector should check that it is not checking. | 
 | --- | 
