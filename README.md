@@ -1,4 +1,4 @@
-<img src="./images/DSILogo.png" alt="UChicago Logo" width="600"/>
+<img src="./images/DSILogo.png" alt="UChicago Logo" width="600" class="center"/>
 
 <br/><br/>
 
