@@ -115,8 +115,7 @@ class ReportGenerator:
         with open(self.report_file_path, "w") as f:
             f.write(self.final_report)
         print(
-            "Data Validation Report written to file:\n  - "
-            f"{self.report_file_path}"
+            "Data Validation Report written to file:\n  - " f"{self.report_file_path}"
         )
 
     def _read_issues_from_file(self, file_path: Path) -> List[Dict]:
@@ -125,14 +124,11 @@ class ReportGenerator:
                 return json.load(f)
         except FileNotFoundError:
             raise FileNotFoundError(
-                "Expected to find a validation_issues json file at "
-                f"{file_path}."
+                "Expected to find a validation_issues json file at " f"{file_path}."
             )
 
     def _set_report_dir(self) -> Path:
-        self.report_dir = self.issues_file_path.parent.parent.joinpath(
-            "reports"
-        )
+        self.report_dir = self.issues_file_path.parent.parent.joinpath("reports")
         self.report_dir.mkdir(exist_ok=True)
 
     def _set_issues(self) -> None:
@@ -145,9 +141,7 @@ class ReportGenerator:
     def _get_class_attributes(self, module_name: str, class_name: str) -> Dict:
         module = importlib.import_module(module_name)
         cls = getattr(module, class_name)
-        attributes = inspect.getmembers(
-            cls, lambda a: not (inspect.isroutine(a))
-        )
+        attributes = inspect.getmembers(cls, lambda a: not (inspect.isroutine(a)))
         attributes = {
             a[0]: a[1]
             for a in attributes
@@ -164,8 +158,7 @@ class ReportGenerator:
         except (ImportError, AttributeError) as e:
             return {
                 "error": (
-                    f"Failed to import {class_name} from "
-                    f"{module_name}: {str(e)}"
+                    f"Failed to import {class_name} from " f"{module_name}: {str(e)}"
                 )
             }
         attributes = {}
@@ -175,14 +168,10 @@ class ReportGenerator:
             except Exception as e:
                 attributes[name] = f"Error accessing {name}: {str(e)}"
         if issubclass(cls, Enum):
-            attributes["enum_members"] = {
-                member.name: member.value for member in cls
-            }
+            attributes["enum_members"] = {member.name: member.value for member in cls}
         return attributes
 
-    def _unpack_core_issue_fields(
-        self, issue: Dict
-    ) -> Tuple[str, str, str, Dict]:
+    def _unpack_core_issue_fields(self, issue: Dict) -> Tuple[str, str, str, Dict]:
         data_format = issue["data_format"]
         issue_type = issue["issue_type"]
         issue_level = issue["issue_level"]
@@ -214,9 +203,7 @@ class ReportGenerator:
     def _format_valid_values(self, valid_values: List[str]) -> str:
         # if I don't need more complex logic later, maybe just roll this code
         #   into the funcs that call this. ToDo
-        return self._list_to_html_table(
-            [{"Valid Values": vv} for vv in valid_values]
-        )
+        return self._list_to_html_table([{"Valid Values": vv} for vv in valid_values])
 
     def _format_id_column_into_fail_table(
         self, id_column: str, fail_list: List
@@ -229,10 +216,7 @@ class ReportGenerator:
             for row, id_col_value, value in fail_list
         ]
         any_truncated_id_col_vals = any(
-            [
-                len(str(fr[id_column])) > self.max_id_col_chars
-                for fr in failing_rows
-            ]
+            [len(str(fr[id_column])) > self.max_id_col_chars for fr in failing_rows]
         )
         if any_truncated_id_col_vals:
             failing_rows = [
@@ -276,20 +260,14 @@ class ReportGenerator:
         try:
             rule_descr = html.escape(validator_attrs["rule_descr"])
         except KeyError:
-            print(
-                f"validation: {validation}\nvalidator_attrs: {validator_attrs}"
-            )
+            print(f"validation: {validation}\nvalidator_attrs: {validator_attrs}")
             # ToDo: remove this try-except block after development
             raise
-        valid_values_table = self._format_valid_values(
-            validator_attrs["valid_values"]
-        )
+        valid_values_table = self._format_valid_values(validator_attrs["valid_values"])
         trunc_note, failing_rows = self._format_id_column_into_fail_table(
             id_column, issue_details["failing_rows_and_values"]
         )
-        toc_descr = (
-            f"{expected_file_name} :: Invalid values in column '{column}'"
-        )
+        toc_descr = f"{expected_file_name} :: Invalid values in column '{column}'"
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
             f"{toc_descr}:</h3>{self.LINK_TO_TOC}\n"
@@ -390,9 +368,7 @@ class ReportGenerator:
         trunc_note, failing_rows = self._format_id_column_into_fail_table(
             id_column, issue_details["failing_rows_and_values"]
         )
-        toc_descr = (
-            f"{expected_file_name} :: {column} :: Incorrect datatype found"
-        )
+        toc_descr = f"{expected_file_name} :: {column} :: Incorrect datatype found"
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
             f"{toc_descr}:</h3>{self.LINK_TO_TOC}"
@@ -580,9 +556,7 @@ class ReportGenerator:
         assert issue_type == "column_dtype_undefined"
         expected_file_name = f"{data_format}.csv"
         column = issue_details["column"]
-        toc_descr = (
-            f"{expected_file_name} :: Undefined datatype for column '{column}'"
-        )
+        toc_descr = f"{expected_file_name} :: Undefined datatype for column '{column}'"
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
             f"{toc_descr}</h3>{self.LINK_TO_TOC}\n"
@@ -619,8 +593,7 @@ class ReportGenerator:
             all_fails_recorded
         )
         toc_descr = (
-            f"{expected_file_name} :: Unallowed nulls found in column "
-            f"'{column}'"
+            f"{expected_file_name} :: Unallowed nulls found in column " f"'{column}'"
         )
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
@@ -707,8 +680,7 @@ class ReportGenerator:
         error_msg = html.escape(issue_details["error_msg"])
         error_type = html.escape(issue_details["error_type"])
         toc_descr = (
-            f"{expected_file_name} :: Unexpected error while dtyping {column}"
-            " column"
+            f"{expected_file_name} :: Unexpected error while dtyping {column}" " column"
         )
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
@@ -740,9 +712,7 @@ class ReportGenerator:
             id_column, issue_details["failing_rows_and_values"]
         )
         n_short_rows = issue_details["total_fails"]
-        toc_descr = (
-            f"{expected_file_name} :: Inconsistent number of columns" " column"
-        )
+        toc_descr = f"{expected_file_name} :: Inconsistent number of columns" " column"
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
             f"{toc_descr}</h3>{self.LINK_TO_TOC}\n"
@@ -795,16 +765,12 @@ class ReportGenerator:
             (
                 toc_line,
                 formatted_issue,
-            ) = self._format_column_dtype_validation_misc_issue(
-                issue, issue_number
-            )
+            ) = self._format_column_dtype_validation_misc_issue(issue, issue_number)
         elif issue_type == "enough_columns_validation":
             (
                 toc_line,
                 formatted_issue,
-            ) = self._format_enough_columns_validation_issue(
-                issue, issue_number
-            )
+            ) = self._format_enough_columns_validation_issue(issue, issue_number)
         elif issue_type == "required_column_not_null_validation":
             (
                 toc_line,
@@ -855,8 +821,7 @@ class ReportGenerator:
     def format_summary_stats(self) -> str:
         df_counts = dict(
             Counter(
-                tuple(i[k] for k in ["data_format", "issue_level"])
-                for i in self.issues
+                tuple(i[k] for k in ["data_format", "issue_level"]) for i in self.issues
             )
         )
 
@@ -864,9 +829,7 @@ class ReportGenerator:
         for issue_level in constants.EXPECTED_ISSUE_LEVELS:
             counts = []
             for data_format in constants.EXPECTED_DATA_FORMATS:
-                format_and_level_counts = df_counts.get(
-                    (data_format, issue_level)
-                )
+                format_and_level_counts = df_counts.get((data_format, issue_level))
                 if format_and_level_counts:
                     stats = {
                         "data_format": data_format,
@@ -934,9 +897,7 @@ class ReportGenerator:
                 pretty_issues.append(json.dumps(formatted_issue, indent=4))
             else:
                 pretty_issues.append(formatted_issue)
-        rundate_str = re.search(
-            r"\d{8}_\d{6}", self.issues_file_path.name
-        ).group()
+        rundate_str = re.search(r"\d{8}_\d{6}", self.issues_file_path.name).group()
         date_dt = dt.datetime.strptime(rundate_str, "%Y%m%d_%H%M%S")
         fmtd_rundate_str = dt.datetime.strftime(date_dt, "%Y-%m-%d %H:%M:%S")
         final_report = [
@@ -950,14 +911,9 @@ class ReportGenerator:
         final_report.extend(pretty_issues)
         return "\n\n".join(final_report)
 
-    def _format_all_fails_recorded_message(
-        self, all_fails_recorded: bool
-    ) -> str:
+    def _format_all_fails_recorded_message(self, all_fails_recorded: bool) -> str:
         if all_fails_recorded:
-            msg = (
-                "Showing all instances of the erroneous data raising this"
-                " issue."
-            )
+            msg = "Showing all instances of the erroneous data raising this" " issue."
         else:
             msg = (
                 f"Only showing values from the first {self.max_error_rows} "

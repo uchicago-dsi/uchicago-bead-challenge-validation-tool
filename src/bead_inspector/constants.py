@@ -30,23 +30,19 @@ class Validator:
     #   so there's no runtime harm to excluding that.
     @classmethod
     @property
-    def rule_descr(cls) -> str:
-        ...
+    def rule_descr(cls) -> str: ...
 
     @classmethod
     @property
-    def valid_values(cls) -> str:
-        ...
+    def valid_values(cls) -> str: ...
 
     @classmethod
-    def validator(cls) -> Callable[Any, bool]:
-        ...
+    def validator(cls) -> Callable[Any, bool]: ...
 
 
 class RuleValidator(Validator):
     @property
-    def rule_descr(self) -> str:
-        ...
+    def rule_descr(self) -> str: ...
 
 
 class DjangoEnum(Enum):
@@ -116,9 +112,7 @@ class PhoneValidator:
     @classmethod
     def validator(cls):
         return (
-            lambda x: x is None
-            or x == ""
-            or bool(re.match(r"^\d{3}-\d{3}-\d{4}$", x))
+            lambda x: x is None or x == "" or bool(re.match(r"^\d{3}-\d{3}-\d{4}$", x))
         )
 
 
@@ -141,9 +135,7 @@ class ZipNullableValidator:
 
     @classmethod
     def validator(cls):
-        return (
-            lambda x: x == "" or x is None or bool(re.match(r"^\d{5}$", str(x)))
-        )
+        return lambda x: x == "" or x is None or bool(re.match(r"^\d{5}$", str(x)))
 
 
 class ChallengeIdValidator:
@@ -184,10 +176,7 @@ class DateValidator:
     @property
     def valid_values(cls) -> List[str]:
         return [
-            (
-                "A string representation of a date in ISO 8601 extended date "
-                "format."
-            ),
+            ("A string representation of a date in ISO 8601 extended date " "format."),
         ]
 
     @classmethod
@@ -216,10 +205,7 @@ class DateNullableValidator:
     @property
     def valid_values(cls) -> List[str]:
         return [
-            (
-                "A string representation of a date in ISO 8601 extended date "
-                "format."
-            ),
+            ("A string representation of a date in ISO 8601 extended date " "format."),
             "An empty string ('').",
         ]
 
@@ -541,9 +527,7 @@ class WebPageValidator:
     def validator(cls):
         # RegEx to check if the URL starts with http:// or https://
         return (
-            lambda x: x == ""
-            or x is None
-            or bool(re.match(r"^(http://|https://)", x))
+            lambda x: x == "" or x is None or bool(re.match(r"^(http://|https://)", x))
         )
 
 
@@ -646,11 +630,7 @@ class FccProviderIdValidator:
     @classmethod
     def validator(cls):
         # RegEx to check if the string is a 6-digit number
-        return (
-            lambda x: x == ""
-            or x is None
-            or bool(re.match(r"^[1-9]\d{5}$", str(x)))
-        )
+        return lambda x: x == "" or x is None or bool(re.match(r"^[1-9]\d{5}$", str(x)))
 
 
 class CAIRationale(ValidatorEnum):
@@ -961,10 +941,7 @@ class CAIType(ValidatorEnum):
     S = "S: School or institute of higher education"
     L = "L: Library"
     G = "G: Government building"
-    H = (
-        "H: Health clinic, health center, hospital,"
-        " or another medical provider"
-    )
+    H = "H: Health clinic, health center, hospital," " or another medical provider"
     F = "F: Public safety entity"
     P = "P: Public housing organization"
     C = "C: Community support organization"
@@ -1105,10 +1082,7 @@ class ReasonCode(DjangoEnum):
     )
     _9 = (
         "9",
-        (
-            "New, non-standard equipment had to be constructed "
-            "at this location (9)."
-        ),
+        ("New, non-standard equipment had to be constructed " "at this location (9)."),
     )
 
     @classmethod

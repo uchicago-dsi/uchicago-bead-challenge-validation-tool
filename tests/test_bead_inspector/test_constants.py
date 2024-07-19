@@ -135,9 +135,7 @@ def test_FccProviderIdValidator():
 def test_FileNameValidator():
     vfunc = constants.FileNameValidator.validator()
     assert vfunc("bead/challenges/a_challenge/evidence.pdf") is True  # standard
-    assert (
-        vfunc("bead/challenges/challenge0005/stuff.PdF") is True
-    )  # case insensitive
+    assert vfunc("bead/challenges/challenge0005/stuff.PdF") is True  # case insensitive
     assert (
         vfunc(r"bead\challenges\challenge0005\windows.PdF") is True
     )  # windows slashes
@@ -150,9 +148,7 @@ def test_FileNameValidator():
     assert vfunc("challenge_001.pdf challenge_003.pdf") is True
     assert vfunc("challenge_001.pdf challenge_003.ZiP") is False
     assert vfunc("challenge_001.pdf challenge 003.pdf") is False
-    assert vfunc(
-        "challenge_001.pdf challenge 003.pdf challenge_004.pdf"
-    ) is False
+    assert vfunc("challenge_001.pdf challenge 003.pdf challenge_004.pdf") is False
     with pytest.raises(TypeError):
         vfunc()  # An input value is required
 
@@ -161,9 +157,7 @@ def test_FileNameNullableValidator():
     vfunc = constants.FileNameNullableValidator.validator()
     assert vfunc("bead/challenges/a_challenge/evidence.pdf") is True  # standard
     assert vfunc() is True  # An input value is optional here
-    assert (
-        vfunc("bead/challenges/challenge0005/stuff.PdF") is True
-    )  # case insensitive
+    assert vfunc("bead/challenges/challenge0005/stuff.PdF") is True  # case insensitive
     assert (
         vfunc(r"bead\challenges\challenge0005\windows.PdF") is True
     )  # windows slashes
@@ -176,9 +170,7 @@ def test_FileNameNullableValidator():
     assert vfunc("challenge_001.pdf challenge_003.pdf") is True
     assert vfunc("challenge_001.pdf challenge_003.ZiP") is False
     assert vfunc("challenge_001.pdf challenge 003.pdf") is False
-    assert vfunc(
-        "challenge_001.pdf challenge 003.pdf challenge_004.pdf"
-    ) is False
+    assert vfunc("challenge_001.pdf challenge 003.pdf challenge_004.pdf") is False
 
 
 def test_LocationClassificationCode():
@@ -413,8 +405,7 @@ def test_State_validator():
         "WY",
     ]
     check_values = [
-        "".join(pair)
-        for pair in permutations(string.ascii_letters + string.digits, 2)
+        "".join(pair) for pair in permutations(string.ascii_letters + string.digits, 2)
     ]
     for char_pair in check_values:
         if char_pair in valid_values:

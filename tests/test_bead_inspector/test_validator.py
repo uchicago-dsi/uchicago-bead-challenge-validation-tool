@@ -9,6 +9,7 @@ from bead_inspector import validator
 def temp_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("data")
 
+
 def create_csv_file(file_path, csv_data: str):
     with open(file_path, "w+", newline="") as csvfile:
         writer = csv.writer(csvfile)
@@ -26,6 +27,7 @@ def challengers_empty_file(temp_dir):
     create_csv_file(file_path, csv_lines)
     return file_path
 
+
 @pytest.fixture
 def challenges_empty_file(temp_dir):
     csv_content = (
@@ -40,6 +42,7 @@ def challenges_empty_file(temp_dir):
     create_csv_file(file_path, csv_lines)
     return file_path
 
+
 @pytest.fixture
 def cai_empty_file(temp_dir):
     csv_content = (
@@ -51,6 +54,7 @@ def cai_empty_file(temp_dir):
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
     create_csv_file(file_path, csv_lines)
     return file_path
+
 
 @pytest.fixture
 def cai_challenges_empty_file(temp_dir):
@@ -74,6 +78,7 @@ def unserved_empty_file(temp_dir):
     create_csv_file(file_path, csv_lines)
     return file_path
 
+
 @pytest.fixture
 def underserved_empty_file(temp_dir):
     csv_content = "1234567890\n"
@@ -81,6 +86,7 @@ def underserved_empty_file(temp_dir):
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
     create_csv_file(file_path, csv_lines)
     return file_path
+
 
 @pytest.fixture
 def post_challenge_cai_empty_file(temp_dir):
@@ -94,16 +100,16 @@ def post_challenge_cai_empty_file(temp_dir):
     create_csv_file(file_path, csv_lines)
     return file_path
 
+
 @pytest.fixture
 def post_challenge_locations_empty_file(temp_dir):
-    csv_content = (
-        "location_id,classification\n"
-    )
+    csv_content = "location_id,classification\n"
     # ",\n"
     file_path = temp_dir.join("post_challenge_locations.csv")
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
     create_csv_file(file_path, csv_lines)
     return file_path
+
 
 def test_BEADChallengeDataValidator_with_all_files(
     temp_dir,
@@ -119,6 +125,7 @@ def test_BEADChallengeDataValidator_with_all_files(
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     assert len(bcdv.issues) == 0
 
+
 def test_BEADChallengeDataValidator_with_some_files_missing(
     temp_dir,
     challengers_empty_file,
@@ -129,10 +136,7 @@ def test_BEADChallengeDataValidator_with_some_files_missing(
 ):
     missing_formats = {"cai", "cai_challenges", "underserved"}
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
-    file_issues = [
-        i for i in bcdv.issues
-        if i["issue_type"] == "missing_data_file"
-    ]
+    file_issues = [i for i in bcdv.issues if i["issue_type"] == "missing_data_file"]
     assert set([i["data_format"] for i in file_issues]) == missing_formats
 
 
@@ -167,9 +171,7 @@ def test_challenger__column_names():
         assert set(test_issues[0]["columns_missing_from_file"]) == set(
             missing_column_names
         )
-        assert set(test_issues[0]["extra_columns_in_file"]) == set(
-            extra_column_names
-        )
+        assert set(test_issues[0]["extra_columns_in_file"]) == set(extra_column_names)
 
 
 def test_challenger_col_content__challenger():
@@ -508,9 +510,7 @@ def test_challenges__column_names():
         assert set(test_issues[0]["columns_missing_from_file"]) == set(
             missing_column_names
         )
-        assert set(test_issues[0]["extra_columns_in_file"]) == set(
-            extra_column_names
-        )
+        assert set(test_issues[0]["extra_columns_in_file"]) == set(extra_column_names)
 
 
 def test_challenges__column_order():
@@ -538,9 +538,7 @@ def test_challenges__column_order():
         assert set(el["column_name_in_file"] for el in test_issues) == set(
             file_col_names_in_wrong_place
         )
-        assert [
-            el["column_number"] for el in test_issues
-        ] == col_numbers_w_wrong_names
+        assert [el["column_number"] for el in test_issues] == col_numbers_w_wrong_names
 
     # Now with columns out of order and with extra columns
     csv_content = (
@@ -590,9 +588,7 @@ def test_challenges__column_order():
             el["expected_column_name"] for el in cols_out_of_order
         ]
         misordered_expected_col_names = [
-            c
-            for c in missing_expected_cols_w_missings
-            if c != "<missing_column>"
+            c for c in missing_expected_cols_w_missings if c != "<missing_column>"
         ]
         misordered_col_names_in_file_w_missings = [
             el["column_name_in_file"] for el in cols_out_of_order
@@ -605,9 +601,7 @@ def test_challenges__column_order():
         assert set(misordered_expected_col_names) == set(
             expected_cols_not_in_expected_place
         )
-        assert set(misordered_col_names_in_file) == set(
-            file_col_names_in_wrong_place
-        )
+        assert set(misordered_col_names_in_file) == set(file_col_names_in_wrong_place)
         assert set(el["column_name_in_file"] for el in cols_out_of_order) == set(
             file_col_names_in_wrong_place
         )
@@ -735,6 +729,7 @@ def test_challenges_column_dtypes__advertised_download_speed():
         failing_rows = [row for row, id_col, col in row_fails[0]]
         assert failing_rows == invalid_value_rows
         assert all(r in failing_rows for r in invalid_value_rows)
+
 
 def test_challenges_column_dtypes__download_speed():
     csv_content = (
@@ -1667,8 +1662,7 @@ def test_challenges_row_rule__reason_code_given_challenge_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesAvailabilityChallengeTypeRuleValidator"
+            if i["validation"] == "ChallengesAvailabilityChallengeTypeRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -1731,8 +1725,7 @@ def test_challenges_row_rule__resolution_given_challenge_type__disposition():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesResolutionGivenChallengeTypeRuleValidator"
+            if i["validation"] == "ChallengesResolutionGivenChallengeTypeRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -1845,8 +1838,7 @@ def test_challenges_row_rule__provider_id_given_challenge_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesProviderIdChallengeTypeRuleValidator"
+            if i["validation"] == "ChallengesProviderIdChallengeTypeRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -1900,8 +1892,7 @@ def test_challenges_row_rule__technology_given_challenge_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesTechnologyChallengeTypeRuleValidator"
+            if i["validation"] == "ChallengesTechnologyChallengeTypeRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -1940,8 +1931,7 @@ def test_challenges_row_rule__evidence_file_id_given_challenge_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesEvidenceFileChallengeTypeRuleValidator"
+            if i["validation"] == "ChallengesEvidenceFileChallengeTypeRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -1978,8 +1968,7 @@ def test_challenges_row_rule__rebuttal_date_not_before_challenge_date():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesChallengeAndRebuttalDateRuleValidator"
+            if i["validation"] == "ChallengesChallengeAndRebuttalDateRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -2016,8 +2005,7 @@ def test_challenges_row_rule__resolution_date_not_before_challenge_date():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesChallengeAndResolutionDateRuleValidator"
+            if i["validation"] == "ChallengesChallengeAndResolutionDateRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -2054,8 +2042,7 @@ def test_challenges_row_rule__resolution_date_not_before_rebuttal_date():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesRebuttalAndResolutionDateRuleValidator"
+            if i["validation"] == "ChallengesRebuttalAndResolutionDateRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -2167,8 +2154,7 @@ def test_challenges_row_rule__download_speed_given_challenge_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesDownloadSpeedChallengeTypeRuleValidator"
+            if i["validation"] == "ChallengesDownloadSpeedChallengeTypeRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -2280,8 +2266,7 @@ def test_challenges_row_rule__upload_speed_given_challenge_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "ChallengesUploadSpeedChallengeTypeRuleValidator"
+            if i["validation"] == "ChallengesUploadSpeedChallengeTypeRuleValidator"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -2315,8 +2300,7 @@ def test_challenges_column_not_null_validations():
             if i["issue_type"] == "required_column_not_null_validation"
         ]
         null_rows_by_column = {
-            id["column"]: id["rows_where_column_is_null"]
-            for id in col_nullness_issues
+            id["column"]: id["rows_where_column_is_null"] for id in col_nullness_issues
         }
         assert [r[0] for r in null_rows_by_column["challenge"]] == [
             2
@@ -2389,9 +2373,7 @@ def test_cai__column_names():
         assert set(test_issues[0]["columns_missing_from_file"]) == set(
             missing_column_names
         )
-        assert set(test_issues[0]["extra_columns_in_file"]) == set(
-            extra_column_names
-        )
+        assert set(test_issues[0]["extra_columns_in_file"]) == set(extra_column_names)
 
 
 def test_cai__column_order():
@@ -2433,9 +2415,7 @@ def test_cai__column_order():
             el["expected_column_name"] for el in cols_out_of_order
         ]
         misordered_expected_col_names = [
-            c
-            for c in missing_expected_cols_w_missings
-            if c != "<missing_column>"
+            c for c in missing_expected_cols_w_missings if c != "<missing_column>"
         ]
         misordered_col_names_in_file_w_missings = [
             el["column_name_in_file"] for el in cols_out_of_order
@@ -2448,9 +2428,7 @@ def test_cai__column_order():
         assert set(misordered_expected_col_names) == set(
             expected_cols_not_in_expected_place
         )
-        assert set(misordered_col_names_in_file) == set(
-            file_col_names_in_wrong_place
-        )
+        assert set(misordered_col_names_in_file) == set(file_col_names_in_wrong_place)
         assert set(el["column_name_in_file"] for el in cols_out_of_order) == set(
             file_col_names_in_wrong_place
         )
@@ -3226,8 +3204,7 @@ def test_cai_row_rule__explanation_given_cai_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "PostChallengeCaiExplanationValidationGivenCAIType"
+            if i["validation"] == "PostChallengeCaiExplanationValidationGivenCAIType"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -3268,9 +3245,7 @@ def test_cai_challenges__column_names():
         assert set(test_issues[0]["columns_missing_from_file"]) == set(
             missing_column_names
         )
-        assert set(test_issues[0]["extra_columns_in_file"]) == set(
-            extra_column_names
-        )
+        assert set(test_issues[0]["extra_columns_in_file"]) == set(extra_column_names)
 
 
 def test_cai_challenges__column_order():
@@ -3318,9 +3293,7 @@ def test_cai_challenges__column_order():
             el["expected_column_name"] for el in cols_out_of_order
         ]
         misordered_expected_col_names = [
-            c
-            for c in missing_expected_cols_w_missings
-            if c != "<missing_column>"
+            c for c in missing_expected_cols_w_missings if c != "<missing_column>"
         ]
         misordered_col_names_in_file_w_missings = [
             el["column_name_in_file"] for el in cols_out_of_order
@@ -3333,16 +3306,13 @@ def test_cai_challenges__column_order():
         assert set(misordered_expected_col_names) == set(
             expected_cols_not_in_expected_place
         )
-        assert set(misordered_col_names_in_file) == set(
-            file_col_names_in_wrong_place
-        )
+        assert set(misordered_col_names_in_file) == set(file_col_names_in_wrong_place)
         assert set(el["column_name_in_file"] for el in cols_out_of_order) == set(
             file_col_names_in_wrong_place
         )
         assert [
             el["column_number"] for el in cols_out_of_order
         ] == col_numbers_w_wrong_names
-
 
 
 def test_cai_challenges_column_dtypes__entity_number():
@@ -3865,8 +3835,7 @@ def test_cai_challenge_row_rule__location_possibly_determinable():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "CaiChallengeCaiLocationValidationPostChallenge"
+            if i["validation"] == "CaiChallengeCaiLocationValidationPostChallenge"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -3948,8 +3917,7 @@ def test_cai_challenge_row_rule__challenge_explanation_given_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "CaiChallengeChallengeExplanationConditionalTypeC"
+            if i["validation"] == "CaiChallengeChallengeExplanationConditionalTypeC"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -4082,7 +4050,6 @@ def test_post_challenge_location_column_dtypes__location_id():
         failing_rows = [row for row, id_col, col in row_fails[0]]
         assert failing_rows == invalid_value_rows
         assert all(r in failing_rows for r in invalid_value_rows)
-
 
 
 def test_post_challenge_location_column_dtypes__classification():
@@ -4960,8 +4927,7 @@ def test_post_challenge_cai_row_rule__explanation_given_cai_type():
         row_fails = [
             i["failing_rows_and_values"]
             for i in row_rule_issues
-            if i["validation"]
-            == "PostChallengeCaiExplanationValidationGivenCAIType"
+            if i["validation"] == "PostChallengeCaiExplanationValidationGivenCAIType"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -5053,11 +5019,7 @@ def test_unserved_column_dtypes__location_id():
 
 def test_unserved_col_content__location_id():
     csv_content = (
-        "1002345678\n"
-        "2003456789\n"
-        "300345678\n"
-        "40023456789\n"
-        "5002345XII\n"
+        "1002345678\n" "2003456789\n" "300345678\n" "40023456789\n" "5002345XII\n"
     )
     invalid_value_rows = [3, 4, 5]
     with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
@@ -5099,7 +5061,6 @@ def test_underserved__column_order():
         ]
 
 
-
 def test_underserved_column_dtypes__location_id():
     csv_content = (
         "1234\n"  # 1
@@ -5134,11 +5095,7 @@ def test_underserved_column_dtypes__location_id():
 
 def test_underserved_col_content__location_id():
     csv_content = (
-        "1002345678\n"
-        "2003456789\n"
-        "300345678\n"
-        "40023456789\n"
-        "5002345XII\n"
+        "1002345678\n" "2003456789\n" "300345678\n" "40023456789\n" "5002345XII\n"
     )
     invalid_value_rows = [3, 4, 5]
     with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:

@@ -27,9 +27,7 @@ class ColumnValidation:
 
 
 class RowValidation:
-    def __init__(
-        self, validation: constants.Validator, issue_level: str = "error"
-    ):
+    def __init__(self, validation: constants.Validator, issue_level: str = "error"):
         self.validation = validation
         self.issue_level = issue_level
 
@@ -113,16 +111,12 @@ class SingleFileValidator:
     def set_id_column(self, id_column: str) -> None:
         self.id_column = id_column
         if self.id_column in self.csv_data_object.header:
-            self.id_column_index = self.csv_data_object.header.index(
-                self.id_column
-            )
+            self.id_column_index = self.csv_data_object.header.index(self.id_column)
         else:
             self.id_column_index = None
 
     def validate_column_names(self) -> None:
-        expected_cols = [self.csv_data_object.index_col] + [
-            *self.column_dtypes.keys()
-        ]
+        expected_cols = [self.csv_data_object.index_col] + [*self.column_dtypes.keys()]
         file_cols = self.csv_data_object.header
         if set(expected_cols) != set(file_cols):
             missing_cols = set(expected_cols).difference(set(file_cols))
@@ -140,9 +134,7 @@ class SingleFileValidator:
             )
 
     def validate_column_order(self) -> None:
-        expected_cols = [self.csv_data_object.index_col] + [
-            *self.column_dtypes.keys()
-        ]
+        expected_cols = [self.csv_data_object.index_col] + [*self.column_dtypes.keys()]
         file_cols = self.csv_data_object.header
         cols_out_of_order = []
         for i, (exp_col, file_col) in enumerate(
@@ -193,10 +185,7 @@ class SingleFileValidator:
                 try:
                     if i > (len(row) - 1):
                         num_cols_in_row_errors += 1
-                        if (
-                            num_cols_in_row_errors
-                            <= self.single_error_log_limit
-                        ):
+                        if num_cols_in_row_errors <= self.single_error_log_limit:
                             try:
                                 id_col_value = row[self.id_column_index]
                             except IndexError:
@@ -209,9 +198,7 @@ class SingleFileValidator:
                             )
                         continue
                     if valid_column_type != str:
-                        if column_can_be_null and (
-                            row[i] is None or row[i] == ""
-                        ):
+                        if column_can_be_null and (row[i] is None or row[i] == ""):
                             continue
                         row[i] = valid_column_type(row[i])
                 except (ValueError, IndexError):
@@ -357,9 +344,7 @@ class SingleFileValidator:
                             "issue_details": {
                                 "column": column,
                                 "id_column": self.id_column,
-                                "validation": (
-                                    col_validation.validation.__name__
-                                ),
+                                "validation": (col_validation.validation.__name__),
                                 "failing_rows_and_values": failing_rows,
                                 "total_fails": num_errors,
                                 "all_fails_recorded": num_errors
@@ -454,9 +439,7 @@ class ChallengerDataValidator:
         RowValidation(rules.ChallengersISPProviderIdRuleValidator),
     ]
 
-    def __init__(
-        self, file_path: Path, single_error_log_limit: int = 20
-    ) -> None:
+    def __init__(self, file_path: Path, single_error_log_limit: int = 20) -> None:
         self.file_validator = SingleFileValidator(
             data_format="challenger",
             file_path=file_path,
@@ -521,12 +504,8 @@ class ChallengesDataValidator:
         ColumnValidation("technology", constants.Technology),
         ColumnValidation("location_id", constants.BSLLocationIdValidator),
         ColumnValidation("reason_code", constants.ReasonCode),
-        ColumnValidation(
-            "evidence_file_id", constants.FileNameNullableValidator
-        ),
-        ColumnValidation(
-            "response_file_id", constants.FileNameNullableValidator
-        ),
+        ColumnValidation("evidence_file_id", constants.FileNameNullableValidator),
+        ColumnValidation("response_file_id", constants.FileNameNullableValidator),
         ColumnValidation(
             "advertised_download_speed",
             constants.NonNegativeNumberNullableValidator,
@@ -538,28 +517,18 @@ class ChallengesDataValidator:
             "advertised_upload_speed",
             constants.NonNegativeNumberNullableValidator,
         ),
-        ColumnValidation(
-            "upload_speed", constants.NonNegativeNumberNullableValidator
-        ),
-        ColumnValidation(
-            "latency", constants.NonNegativeNumberNullableValidator
-        ),
+        ColumnValidation("upload_speed", constants.NonNegativeNumberNullableValidator),
+        ColumnValidation("latency", constants.NonNegativeNumberNullableValidator),
     ]
     ROW_VALIDATIONS = [
-        RowValidation(
-            rules.ChallengesChallengerIdGivenChallengeTypeRuleValidator
-        ),
+        RowValidation(rules.ChallengesChallengerIdGivenChallengeTypeRuleValidator),
         RowValidation(rules.ChallengesAvailabilityChallengeTypeRuleValidator),
-        RowValidation(
-            rules.ChallengesResolutionGivenChallengeTypeRuleValidator
-        ),
+        RowValidation(rules.ChallengesResolutionGivenChallengeTypeRuleValidator),
         RowValidation(
             rules.ChallengesAdvertisedDownloadSpeedChallengeTypeRuleValidator
         ),
         RowValidation(rules.ChallengesDownloadSpeedChallengeTypeRuleValidator),
-        RowValidation(
-            rules.ChallengesAdvertisedUploadSpeedChallengeTypeRuleValidator
-        ),
+        RowValidation(rules.ChallengesAdvertisedUploadSpeedChallengeTypeRuleValidator),
         RowValidation(rules.ChallengesUploadSpeedChallengeTypeRuleValidator),
         RowValidation(rules.ChallengesRebuttalDateAndFileRuleValidator),
         RowValidation(rules.ChallengesLatencyChallengeTypeRuleValidator),
@@ -571,9 +540,7 @@ class ChallengesDataValidator:
         RowValidation(rules.ChallengesRebuttalAndResolutionDateRuleValidator),
     ]
 
-    def __init__(
-        self, file_path: Path, single_error_log_limit: int = 20
-    ) -> None:
+    def __init__(self, file_path: Path, single_error_log_limit: int = 20) -> None:
         self.file_validator = SingleFileValidator(
             data_format="challenges",
             file_path=file_path,
@@ -627,20 +594,14 @@ class PostChallengeCAIDataValidator:
             constants.CMSCertificateNullableValidator,
             issue_level="info",
         ),
-        ColumnValidation(
-            "frn", constants.FrnNullableValidator, issue_level="info"
-        ),
-        ColumnValidation(
-            "location_id", constants.BSLLocationIdNullableValidator
-        ),
+        ColumnValidation("frn", constants.FrnNullableValidator, issue_level="info"),
+        ColumnValidation("location_id", constants.BSLLocationIdNullableValidator),
         ColumnValidation("state", constants.State),
         ColumnValidation("zip_code", constants.ZipNullableValidator),
         ColumnValidation("longitude", constants.LongitudeNullableValidator),
         ColumnValidation("latitude", constants.LatitudeNullableValidator),
         ColumnValidation("need", constants.NonNegativeNumberValidator),
-        ColumnValidation(
-            "availability", constants.NonNegativeNumberNullableValidator
-        ),
+        ColumnValidation("availability", constants.NonNegativeNumberNullableValidator),
     ]
 
     ROW_VALIDATIONS = [
@@ -656,9 +617,7 @@ class PostChallengeCAIDataValidator:
 
     DATA_FORMAT = "post_challenge_cai"
 
-    def __init__(
-        self, file_path: Path, single_error_log_limit: int = 20
-    ) -> None:
+    def __init__(self, file_path: Path, single_error_log_limit: int = 20) -> None:
         self.file_validator = SingleFileValidator(
             data_format=self.DATA_FORMAT,
             file_path=file_path,
@@ -726,9 +685,7 @@ class CAIChallengeDataValidator:
     COLUMN_VALIDATIONS = [
         ColumnValidation("challenge", constants.ChallengeIdValidator),
         ColumnValidation("challenge_type", constants.CAIChallengeType),
-        ColumnValidation(
-            "category_code", constants.CAIRationaleNullableValidator
-        ),
+        ColumnValidation("category_code", constants.CAIRationaleNullableValidator),
         ColumnValidation("disposition", constants.DispositionsOfCAIChallenge),
         ColumnValidation("type", constants.CAIType),
         ColumnValidation(
@@ -736,20 +693,14 @@ class CAIChallengeDataValidator:
             constants.CMSCertificateNullableValidator,
             issue_level="info",
         ),
-        ColumnValidation(
-            "frn", constants.FrnNullableValidator, issue_level="info"
-        ),
-        ColumnValidation(
-            "location_id", constants.BSLLocationIdNullableValidator
-        ),
+        ColumnValidation("frn", constants.FrnNullableValidator, issue_level="info"),
+        ColumnValidation("location_id", constants.BSLLocationIdNullableValidator),
         ColumnValidation("state", constants.State),
         ColumnValidation("zip_code", constants.ZipNullableValidator),
         ColumnValidation("longitude", constants.LongitudeNullableValidator),
         ColumnValidation("latitude", constants.LatitudeNullableValidator),
         ColumnValidation("need", constants.NonNegativeNumberValidator),
-        ColumnValidation(
-            "availability", constants.NonNegativeNumberNullableValidator
-        ),
+        ColumnValidation("availability", constants.NonNegativeNumberNullableValidator),
     ]
 
     ROW_VALIDATIONS = [
@@ -758,15 +709,11 @@ class CAIChallengeDataValidator:
         RowValidation(rules.CaiChallengeExplanationConditionalTypeC),
         RowValidation(rules.CaiChallengeEntityNameConditionalType),
         RowValidation(rules.CaiChallengeChallengeExplanationConditionalTypeC),
-        RowValidation(
-            rules.CaiChallengeCMSConditionalTypeH, issue_level="info"
-        ),
+        RowValidation(rules.CaiChallengeCMSConditionalTypeH, issue_level="info"),
         RowValidation(rules.CaiChallengeFRNGivenType, issue_level="info"),
     ]
 
-    def __init__(
-        self, file_path: Path, single_error_log_limit: int = 20
-    ) -> None:
+    def __init__(self, file_path: Path, single_error_log_limit: int = 20) -> None:
         self.file_validator = SingleFileValidator(
             data_format="cai_challenges",
             file_path=file_path,
@@ -789,15 +736,11 @@ class PostChallengeLocationDataValidator:
     NULLABLE_COLUMNS = []
     COLUMN_VALIDATIONS = [
         ColumnValidation("location_id", constants.BSLLocationIdValidator),
-        ColumnValidation(
-            "classification", constants.LocationClassificationCode
-        ),
+        ColumnValidation("classification", constants.LocationClassificationCode),
     ]
     ROW_VALIDATIONS = []
 
-    def __init__(
-        self, file_path: Path, single_error_log_limit: int = 20
-    ) -> None:
+    def __init__(self, file_path: Path, single_error_log_limit: int = 20) -> None:
         self.file_validator = SingleFileValidator(
             data_format="post_challenge_locations",
             file_path=file_path,
@@ -820,9 +763,7 @@ class UnservedDataValidator:
     ]
     ROW_VALIDATIONS = []
 
-    def __init__(
-        self, file_path: Path, single_error_log_limit: int = 20
-    ) -> None:
+    def __init__(self, file_path: Path, single_error_log_limit: int = 20) -> None:
         self.file_validator = SingleFileValidator(
             data_format="unserved",
             file_path=file_path,
@@ -847,9 +788,7 @@ class UnderservedDataValidator:
     ]
     ROW_VALIDATIONS = []
 
-    def __init__(
-        self, file_path: Path, single_error_log_limit: int = 20
-    ) -> None:
+    def __init__(self, file_path: Path, single_error_log_limit: int = 20) -> None:
         self.file_validator = SingleFileValidator(
             data_format="underserved",
             file_path=file_path,
@@ -993,9 +932,7 @@ class BEADChallengeDataValidator:
             )
             new_issues = data_validator.file_validator.issues
             if data_validator.file_validator.can_continue:
-                print(
-                    f"Ran single-file validations for the {data_format} format."
-                )
+                print(f"Ran single-file validations for the {data_format} format.")
             else:
                 print(
                     "Failed to run single-file validations for the "
@@ -1058,9 +995,7 @@ class BEADChallengeDataValidator:
                             "Found challengers in the Challenges dataset that"
                             " aren't in the Challengers dataset."
                         ),
-                        "invalid_values": (
-                            unregistered_yet_submitting_challengers
-                        ),
+                        "invalid_values": (unregistered_yet_submitting_challengers),
                     },
                 }
             )
@@ -1103,9 +1038,7 @@ class BEADChallengeDataValidator:
                             "Found challengers in the CAIChallenges dataset"
                             " that aren't in the Challengers dataset."
                         ),
-                        "invalid_values": (
-                            unregistered_yet_submitting_challengers
-                        ),
+                        "invalid_values": (unregistered_yet_submitting_challengers),
                     },
                 }
             )
@@ -1116,9 +1049,7 @@ class BEADChallengeDataValidator:
         else:
             self.issues = sorted(self.issues, key=lambda x: x["issue_level"])
             write_issues_to_json(issues=self.issues, file_path=self.log_path)
-        print(
-            f"Number of issues (or types of issues) found: {len(self.issues)}"
-        )
+        print(f"Number of issues (or types of issues) found: {len(self.issues)}")
 
 
 def write_issues_to_json(issues: List[Dict], file_path: Path) -> None:

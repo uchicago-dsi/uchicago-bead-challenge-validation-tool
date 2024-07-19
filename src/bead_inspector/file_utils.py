@@ -65,8 +65,7 @@ class CSVData:
             self.header = standardized_header
         else:
             raise Exception(
-                "Something unexpected happened during column name "
-                "standardization."
+                "Something unexpected happened during column name " "standardization."
             )
 
     def _set_index(self, header: List[str], _limit: int = 10) -> List[str]:

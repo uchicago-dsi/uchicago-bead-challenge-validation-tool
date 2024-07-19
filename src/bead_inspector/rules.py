@@ -60,9 +60,7 @@ class ChallengersISPProviderIdRuleValidator:
             if row[cls.category_index] != "B":
                 return True
             else:
-                return bool(
-                    re.match(r"^[1-9]\d{5}$", row[cls.provider_id_index])
-                )
+                return bool(re.match(r"^[1-9]\d{5}$", row[cls.provider_id_index]))
 
         return validate
 
@@ -74,8 +72,7 @@ class ChallengersISPProviderIdRuleValidator:
 
 class ChallengesChallengerIdGivenChallengeTypeRuleValidator:
     rule_descr = (
-        "Challenger cannot be blank for challenge-types in "
-        "[A, S, L, D, T, B, P]."
+        "Challenger cannot be blank for challenge-types in " "[A, S, L, D, T, B, P]."
     )
     short_descr = "Required challenger id values are missing"
     challenge_type_index: int = 2
@@ -153,9 +150,7 @@ class ChallengesChallengeAndRebuttalDateRuleValidator:
             challenge_date_not_null = (
                 challenge_date != "" and challenge_date is not None
             )
-            rebuttal_date_not_null = (
-                rebuttal_date != "" and rebuttal_date is not None
-            )
+            rebuttal_date_not_null = rebuttal_date != "" and rebuttal_date is not None
             if challenge_date_not_null and rebuttal_date_not_null:
                 try:
                     date_ordering_is_possible = dt.datetime.strptime(
@@ -222,9 +217,7 @@ class ChallengesRebuttalAndResolutionDateRuleValidator:
         def validate(row: List[Any]) -> bool:
             rebuttal_date = row[cls.rebuttal_date_index]
             resolution_date = row[cls.resolution_date_index]
-            rebuttal_date_not_null = (
-                rebuttal_date != "" and rebuttal_date is not None
-            )
+            rebuttal_date_not_null = rebuttal_date != "" and rebuttal_date is not None
             resolution_date_not_null = (
                 resolution_date != "" and resolution_date is not None
             )
@@ -243,9 +236,7 @@ class ChallengesRebuttalAndResolutionDateRuleValidator:
 
 
 class ChallengesProviderIdChallengeTypeRuleValidator:
-    rule_descr = (
-        "A 'provider_id' value is required for all challenge_types except 'P'."
-    )
+    rule_descr = "A 'provider_id' value is required for all challenge_types except 'P'."
     short_descr = "Required provider_id values are missing"
     challenge_type_index: int = 2
     provider_id_index: int = 8
@@ -261,9 +252,7 @@ class ChallengesProviderIdChallengeTypeRuleValidator:
 
 
 class ChallengesTechnologyChallengeTypeRuleValidator:
-    rule_descr = (
-        "A technology value is required for all challenge-types except for N."
-    )
+    rule_descr = "A technology value is required for all challenge-types except for N."
     short_descr = "Required technology values are missing"
     challenge_type_index: int = 2
     technology_index: int = 9
@@ -277,9 +266,7 @@ class ChallengesTechnologyChallengeTypeRuleValidator:
             nullable_type = challenge_type in cls.not_null_types
             null_technology_value = technology == "" or technology is None
             tech_code_is_valid = technology in constants.Technology.get_values()
-            return tech_code_is_valid or (
-                nullable_type and null_technology_value
-            )
+            return tech_code_is_valid or (nullable_type and null_technology_value)
 
         return validate
 
@@ -373,8 +360,7 @@ class ChallengesAdvertisedDownloadSpeedChallengeTypeRuleValidator:
 
 class ChallengesDownloadSpeedChallengeTypeRuleValidator:
     rule_descr = (
-        "A 'download_speed' value is only needed for "
-        "challenge-types 'M' and 'S'."
+        "A 'download_speed' value is only needed for " "challenge-types 'M' and 'S'."
     )
     short_descr = "Required download_speed values are missing"
     challenge_type_index: int = 2
@@ -426,8 +412,7 @@ class ChallengesAdvertisedUploadSpeedChallengeTypeRuleValidator:
 
 class ChallengesUploadSpeedChallengeTypeRuleValidator:
     rule_descr = (
-        "An 'upload_speed' value is only needed for "
-        "challenge-types 'M' and 'S'."
+        "An 'upload_speed' value is only needed for " "challenge-types 'M' and 'S'."
     )
     short_descr = "Required upload_speed values are missing"
     challenge_type_index: int = 2
@@ -444,9 +429,7 @@ class ChallengesUploadSpeedChallengeTypeRuleValidator:
 
 
 class ChallengesLatencyChallengeTypeRuleValidator:
-    rule_descr = (
-        "A 'latency' value is only needed for challenge-types 'L' and 'M'."
-    )
+    rule_descr = "A 'latency' value is only needed for challenge-types 'L' and 'M'."
     short_descr = "Required latency values are missing"
     challenge_type_index: int = 2
     latency_index: int = 20
