@@ -88,13 +88,87 @@ The `html` file in the `reports` subdirectory is a human readable version of the
 
 ## Understanding the Report
 
-TODO
+Within our report we denote two different levels of checks:
+
+1. **Errors**: Checks which are errors are extremely likely to need to be fixed before submission. Examples of this would include required fields missing, etc.
+2. **Info**: Our Info level are checks which may or may not need to be fixed, depending on the circumstances of your submissions. For example if an eligible entity has submitted area challenges then, per NOTCP 07/002, the `challenger` field in the `challenges.csv` file should be left empty, which is in contrast to the original policy notice. As such we generate an "Info" level issue as this _may_ need to be fixed depending on the specific challenge.
+
+When a report is generated there are three sections:
+
+1. The [Header](#header)
+2. The [Table of Contents](#table-of-contents)
+3. [Specific Issue list](#specific-issue-list)
+
+### Header
+
+<table>
+<tr>
+<td>
+<p>
+<img src="./images/Header.png" alt="Header Example" width="2400"/>
+</p>
+</td>
+<td>
+<p>The header material consists of a Title, which states the date that the report was run and summary information.</p>
+
+<p>The summary information is broken out by Errors and Info level issues. The first column is the data format, which is the name of the CSV that is being analyzed. The second column specifies the level of the issue. The third column specifies the number of issues of this level found in the file.</p>
+
+<p>Finally the last column in the table specifies the total number of rows found in that file.</p>
+</td>
+</tr>
+<table>
+
+### Table of Contents
+
+<table>
+<tr>
+<td>
+<p>
+<img src="./images/TableOfContents.png" alt="TOC Example" width="2400"/>
+</p>
+</td>
+<td>
+<p>The Table of Contents contains a list of links to specific issues that were found. They are organized by the level of the issue found (Info / Error). They are numbered, in order, starting from one and the issue name is of the format:</p>
+
+<p>{File where issue was found} :: Name of Issue :: [Optional: Type of Issue]</p>
+
+</td>
+</tr>
+<table>
+
+
+### Specific Issue List
+
+
+<table>
+<tr>
+<td>
+<p>
+<img src="./images/OneIssue.png" alt="Issue Example" width="2400"/>
+</p>
+</td>
+<td>
+<p>Detailed information regarding the specific issue can be found in this section. There are a few new fields that were not previously discussed:</p>
+<ul>
+<li><b>Description:</b> This is a longer description of the problem encountered.</li>
+<li><b>Column:</b> Which column in the CSV this issue applies to.</li>
+<li><b>Failing Rows:</b> Values in the rows which are failing.</li>
+<li><b>Total Rows with Invalid Values:</b> Total number of rows which failed.</li>
+<li><b>All Rows Shown:</b> We only show the first few invalid values. In the case where there are many broken values this will indicate if all failures are shown or not.</li>
+</ul>
+</td>
+</tr>
+<table>
 
 ## FAQ
 
 | Where does the report go? Does the NTIA see this? What about UChicago? |
 | --- | 
-| NOPE! You can look at the code in this repository and see that nothing is reported to NTIA or the University of Chicago. This is simply a tool to identify potential problems. | 
+| NOPE! You can look at the code in this repository and see that nothing is reported to NTIA or the University of Chicago. This is simply a tool to identify potential problems. What you do with the report is up to you! | 
+
+| Some of the issues seem to duplicate, why? |
+| --- | 
+| Some of the checks that we have in place do 
 
 | What if I only want to have _some_ of the files to check? |
 | --- | 
@@ -111,6 +185,51 @@ TODO
 ## Development
 
 If you find a bug or wish to highlight an issue, please use the github tools above.  If you wish to help with development of this project, please submit a pull request which describes the code changes that you are making and why.
+
+I also put together notes for building, testing, and publishing code. I'll find somewhere better for them tomorrow.
+# Dev notes:
+## Making a testing, dev, and packaging env
+python -m venv .venv
+conda deactivate
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .[dev]
+python -m pip install build
+python -m pip install twine
+python -m pip install "setuptools>=61.0"
+python -m pip install "setuptools-scm"
+python -m pip install wheel
+## Building the package
+rm -rf dist/ *.egg-info
+python -m build
+### Testing a build
+deactivate
+python -m venv .testenv
+source .testenv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install dist/bead_inspector-0.0.post1-py3-none-any.whl
+# then try running the code with the built version
+bead_inspector ../path/to/csv_dir
+if all good, you can deactivate and delete the env
+deactivate
+rm -r .testenv
+And just make a new one next time you need one (it only takes a minute or two).
+## Tagging a release
+git checkout -b my_feature_branch
+git add src/stuff.py tests/test_stuff.py
+git commit -m "Prepare for 0.1.0 release"
+git push feature_branch
+# do the PR + merge step on GitHub
+git checkout main
+git pull
+git tag -a v0.1.0 -m "Release version 0.1.0"
+git push origin v0.1.0\
+then build the package again
+rm -r dist
+python -m build
+you can install and test the build if you like (as shown above), and when you're content, you, well, Matt Triano can push it up to PyPI via this command
+twine upload dist/*
+(an API key is required hence it being a Matt Triano thing ATM, but we can sort that out)
 
 **Note** This repo uses [pre-commit](https://pre-commit.com/) hook, please install by typing `pre-commit install`.
 
