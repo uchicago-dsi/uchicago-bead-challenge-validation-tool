@@ -186,7 +186,7 @@ When a report is generated there are three sections:
 
 If you find a bug or wish to highlight an issue, please use the github tools above.  If you wish to help with development of this project, please submit a pull request which describes the code changes that you are making and why.
 
-I also put together notes for building, testing, and publishing code. I'll find somewhere better for them tomorrow.
+<!-- I also put together notes for building, testing, and publishing code. I'll find somewhere better for them tomorrow.
 # Dev notes:
 ## Making a testing, dev, and packaging env
 python -m venv .venv
@@ -231,7 +231,7 @@ you can install and test the build if you like (as shown above), and when you're
 twine upload dist/*
 (an API key is required hence it being a Matt Triano thing ATM, but we can sort that out)
 
-**Note** This repo uses [pre-commit](https://pre-commit.com/) hook, please install by typing `pre-commit install`.
+**Note** This repo uses [pre-commit](https://pre-commit.com/) hook, please install by typing `pre-commit install`. -->
 
 ## Advanced Usage
 
