@@ -1,6 +1,9 @@
+<img src="./images/DSILogo.png" alt="UChicago Logo" width="600"/>
+
+<br/><br/>
+
 # BEAD INSPECTOR
 
-<img src="./images/DSILogo.png" alt="UChicago Logo" width="600"/>
 
 Welcome to the BEAD Inspector, presented by the [University of Chicago's Data Science Institute](https://datascience.uchicago.edu/).
 
@@ -83,12 +86,25 @@ The `html` file in the `reports` subdirectory is a human readable version of the
 
 ## Understanding the Report
 
+TODO
 
 ## FAQ
 
+| What if I only want to have _some_ of the files to check? |
+| --- | 
+| BEAD Inspector only checks the files which are present in the target directory that following the NTIA file naming conventions. If a file is missing a warning will be issued, but the tool will check all present files |
+
+| There is a rule that I think BEAD Inspector should check that it is not checking. | 
+| --- | 
+| Please add an issue to the [issue page](https://github.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/issues). | 
+
+| I found a bug! | 
+| --- | 
+| Please file an issue using the [issue page](https://github.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/issues). We will do our best to fix it as soon as we have time. If you are more technically skilled and know how to fix the issue please put in a pull request.| 
+
 ## Development
 
-If you find a bug or wish to highlight an issue, please use the github tools above. TODO: ADD LINKS TO THE ISSUES PAGE. If you wish to help with development of this project, please submit a pull request which describes the code changes that you are making and why.
+If you find a bug or wish to highlight an issue, please use the github tools above.  If you wish to help with development of this project, please submit a pull request which describes the code changes that you are making and why.
 
 **Note** This repo uses [pre-commit](https://pre-commit.com/) hook, please install by typing `pre-commit install`.
 
