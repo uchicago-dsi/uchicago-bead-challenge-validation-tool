@@ -1,0 +1,9 @@
+global-exclude *
+include pyproject.toml
+include README.md
+include LICENSE
+include src/bead_inspector/_version.py
+recursive-include src/bead_inspector *
+prune src/bead_inspector/__pycache__
+prune src/*.egg-info
+prune src/bead_inspector/.ipynb_checkpoints
