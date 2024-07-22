@@ -1,6 +1,6 @@
 <br/><br/>
 <p align="center">
-<img src="./images/DSILogo.png" alt="UChicago Logo" width="600"/>
+<img src="https://raw.githubusercontent.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/main/images/DSILogo.png" alt="UChicago Logo" width="600"/>
 </p>
 <br/><br/>
 
@@ -105,7 +105,7 @@ When a report is generated there are three sections:
 <tr>
 <td>
 <p>
-<img src="./images/Header.png" alt="Header Example" width="2400"/>
+<img src="https://raw.githubusercontent.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/main/images/Header.png" alt="Header Example" width="2400"/>
 </p>
 </td>
 <td>
@@ -124,7 +124,7 @@ When a report is generated there are three sections:
 <tr>
 <td>
 <p>
-<img src="./images/TableOfContents.png" alt="TOC Example" width="2400"/>
+<img src="https://raw.githubusercontent.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/main/images/TableOfContents.png" alt="TOC Example" width="2400"/>
 </p>
 </td>
 <td>
@@ -144,7 +144,7 @@ When a report is generated there are three sections:
 <tr>
 <td>
 <p>
-<img src="./images/OneIssue.png" alt="Issue Example" width="2400"/>
+<img src="https://raw.githubusercontent.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/main/images/OneIssue.png" alt="Issue Example" width="2400"/>
 </p>
 </td>
 <td>
