@@ -197,7 +197,7 @@ class SingleFileValidator:
                                 (row[0] + self.row_offset, id_col_value, i)
                             )
                         continue
-                    if valid_column_type != str:
+                    if valid_column_type is not str:
                         if column_can_be_null and (row[i] is None or row[i] == ""):
                             continue
                         row[i] = valid_column_type(row[i])
