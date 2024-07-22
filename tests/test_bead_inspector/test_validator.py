@@ -174,6 +174,72 @@ def test_challenger__column_names():
         assert set(test_issues[0]["extra_columns_in_file"]) == set(extra_column_names)
 
 
+
+def test_challenger__column_order():
+    csv_content = (
+        "challenger,provider_id,organization,category,webpage,contact_name,"
+        "contact_phone,contact_email\n"
+    )
+    col_numbers_w_wrong_names = [2, 4, 5, 7, 8]
+    expected_cols_not_in_expected_place = [
+        "category",
+        "provider_id",
+        "webpage",
+        "contact_email",
+        "contact_phone",
+    ]
+    file_col_names_in_wrong_place = [
+        "provider_id",
+        "category",
+        "webpage",
+        "contact_phone",
+        "contact_email",
+    ]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.ChallengerDataValidator(tf.name)
+        issues = _validator.file_validator.issues
+
+        test_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_order_validation"
+        ]
+        assert len(test_issues) == 1
+        cols_out_of_order = test_issues[0]["cols_out_of_order"]
+        assert all(
+            list(el.keys())
+            == ["column_number", "expected_column_name", "column_name_in_file"]
+            for el in cols_out_of_order
+        )
+        missing_expected_cols_w_missings = [
+            el["expected_column_name"] for el in cols_out_of_order
+        ]
+        misordered_expected_col_names = [
+            c for c in missing_expected_cols_w_missings if c != "<missing_column>"
+        ]
+        misordered_col_names_in_file_w_missings = [
+            el["column_name_in_file"] for el in cols_out_of_order
+        ]
+        misordered_col_names_in_file = [
+            c
+            for c in misordered_col_names_in_file_w_missings
+            if c != "<missing_column>"
+        ]
+        assert set(misordered_expected_col_names) == set(
+            expected_cols_not_in_expected_place
+        )
+        assert set(misordered_col_names_in_file) == set(file_col_names_in_wrong_place)
+        assert set(el["column_name_in_file"] for el in cols_out_of_order) == set(
+            file_col_names_in_wrong_place
+        )
+        assert [
+            el["column_number"] for el in cols_out_of_order
+        ] == col_numbers_w_wrong_names
+
+
+
 def test_challenger_col_content__challenger():
     csv_content = (
         "challenger,category,organization,webpage,provider_id,contact_name,"
@@ -1642,12 +1708,13 @@ def test_challenges_row_rule__reason_code_given_challenge_type():
         "9,A,,,,,,,,,,9,,,,,,,,\n"
         "10,A,,,,,,,,,,1,,,,,,,,\n"
         "11,A,,,,,,,,,,10,,,,,,,,\n"
-        "12,B,,,,,,,,,,,,,,,,,,\n"
-        "13,S,,,,,,,,,,,,,,,,,,\n"
-        "14,P,,,,,,,,,,,,,,,,,,\n"
-        "15,E,,,,,,,,,,,,,,,,,,\n"
+        "12,A,,,,,,,,,,,,,,,,,,\n"
+        "13,B,,,,,,,,,,,,,,,,,,\n"
+        "14,S,,,,,,,,,,,,,,,,,,\n"
+        "15,P,,,,,,,,,,,,,,,,,,\n"
+        "16,E,,,,,,,,,,,,,,,,,,\n"
     )
-    rule_breaking_rows = [7, 11]
+    rule_breaking_rows = [7, 11, 12]
     with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
         tf.write(csv_content)
         tf.seek(0)
