@@ -15,19 +15,8 @@ EXPECTED_DATA_FORMATS = [
 ]
 EXPECTED_ISSUE_LEVELS = ["error", "info"]
 
-# Commented to facilitate compatibility with python versions below 3.9
-#   Uncomment to run static type checking.
-# from typing import Protocol
-# class Validator(Protocol):
-#     @classmethod
-#     def validator(cls) -> Callable[Any, bool]:
-#         ...
-
 
 class Validator:
-    # This is intended as a Protocol, but formally using the Protocol type
-    #   limits use to python v3.9+, and it's mainly for static type checking,
-    #   so there's no runtime harm to excluding that.
     @classmethod
     @property
     def rule_descr(cls) -> str: ...
@@ -387,7 +376,9 @@ class LatitudeNullableValidator:
         if x is None or x == "":
             return True
         try:
-            return -90.0 <= float(x) <= 90.0
+            return (-90.0 <= float(x) <= 90.0) and bool(
+                re.match(r"^-?\d+\.\d{6,}$", str(x))
+            )
         except ValueError:
             return False
 
@@ -422,7 +413,9 @@ class LongitudeNullableValidator:
         if x is None or x == "":
             return True
         try:
-            return -180.0 <= float(x) <= 180.0
+            return (-180.000000 <= float(x) <= 180.000000) and bool(
+                re.match(r"^-?\d+\.\d{6,}$", str(x))
+            )
         except ValueError:
             return False
 

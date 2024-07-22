@@ -567,8 +567,8 @@ class PostChallengeCAIDataValidator:
         "city": str,
         "state": str,
         "zip_code": str,
-        "longitude": float,
-        "latitude": float,
+        "longitude": str,  # should be int, but needed for 6-digit-precision check
+        "latitude": str,  # should be int, but needed for 6-digit-precision check
         "explanation": str,
         "need": int,
         "availability": int,
@@ -658,8 +658,8 @@ class CAIChallengeDataValidator:
         "city": str,
         "state": str,
         "zip_code": str,
-        "longitude": float,
-        "latitude": float,
+        "longitude": str,  # should be int, but needed for 6-digit-precision check
+        "latitude": str,  # should be int, but needed for 6-digit-precision check
         "explanation": str,
         "need": int,
         "availability": int,
