@@ -947,14 +947,11 @@ class BEADChallengeDataValidator:
                 self.issues.extend(new_issues)
             self.data_format_validators[data_format] = data_validator
 
-        all_present_flag = len(self.data_format_to_path_map.keys()) == len(
-            self.expected_data_formats
-        )
-        if all_present_flag:
+        present_files = list(self.data_format_to_path_map.keys())
+        if all([fn in present_files for fn in ["challenges", "challengers"]]):
             self.run_challenges_and_challengers_validations()
+        if all([fn in present_files for fn in ["cai_challenges", "challengers"]]):
             self.run_cai_challenges_and_challengers_validations()
-            print("TODO: add more multi-file validations here")
-
         self.output_results()
 
     def run_challenges_and_challengers_validations(self) -> None:
