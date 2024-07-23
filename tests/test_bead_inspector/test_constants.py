@@ -19,6 +19,7 @@ def test_ChallengeIdValidator():
     )  # ChallengeIDs are limited to 50 chars
     assert vfunc("AxeFVYu2dFKppUxhSu35u") is True
     assert vfunc("a1") is True
+    assert vfunc("") is False
 
 
 def test_ChallengeType():

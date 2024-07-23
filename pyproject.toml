@@ -29,6 +29,7 @@ dev = [
     "isort",
     "pytest>=6.0",
     "pytest-cov",
+    "ruff",
 ]
 
 [project.scripts]
@@ -37,6 +38,27 @@ bead_inspector = "bead_inspector.main:main"
 [project.urls]
 Homepage = "https://github.com/uchicago-dsi/uchicago-bead-challenge-validation-tool"
 Issues = "https://github.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/issues"
+
+[tool.ruff]
+line-length = 88
+exclude = [
+    ".git",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "*.egg-info",
+    "build",
+    "dist",
+    "htmlcov",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = []
 
 [tool.setuptools]
 package-dir = {"" = "src"}
