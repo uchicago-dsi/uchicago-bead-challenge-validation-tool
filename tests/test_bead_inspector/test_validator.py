@@ -10,8 +10,8 @@ def temp_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("data")
 
 
-def create_csv_file(file_path, csv_data: str):
-    with open(file_path, "w+", newline="") as csvfile:
+def create_csv_file(file_path, csv_data: str, encoding: str = "utf-8"):
+    with open(file_path, "w+", newline="", encoding=encoding) as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_data)
 
@@ -104,7 +104,6 @@ def post_challenge_cai_empty_file(temp_dir):
 @pytest.fixture
 def post_challenge_locations_empty_file(temp_dir):
     csv_content = "location_id,classification\n"
-    # ",\n"
     file_path = temp_dir.join("post_challenge_locations.csv")
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
     create_csv_file(file_path, csv_lines)
@@ -141,7 +140,197 @@ def test_BEADChallengeDataValidator_with_some_files_missing(
 
 
 #########################################################
-# #################### Multi-File ##################### #
+# ########### Data File Encoding Checks ############### #
+#########################################################
+
+
+@pytest.fixture
+def challenges_file_with_cp1252_chars(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+        "3,,“windows double quote marks”,,,,,,,,,,,,,,,,,\n"
+        "4,,‘windows single quote marks’,,,,,,,,,,,,,,,,,\n"
+        "5,,Euro sign: € (U+20AC),,,,,,,,,,,,,,,,,\n"
+        "6,,Euro sign: € (U+20AC),,,,,,,,,,,,,,,,,\n"
+        "7,,Trademark sign: ™ (U+2122),,,,,,,,,,,,,,,,,\n"
+        "8,,Bullet: • (U+2022),,,,,,,,,,,,,,,,,\n"
+        "9,,Ellipsis: … (U+2026),,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="cp1252")
+    return file_path
+
+
+@pytest.fixture
+def challenges_file_with_latin1_chars(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,Résumé,,,,,,,,,,,,,,,,,\n"
+        "3,,El Niño,,,,,,,,,,,,,,,,,\n"
+        "4,,Hände,,,,,,,,,,,,,,,,,\n"
+        "5,,Mötley Crüe,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="latin1")
+    return file_path
+
+
+@pytest.fixture
+def challenges_file_with_iso_8859_1_chars(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,Résumé,,,,,,,,,,,,,,,,,\n"
+        "3,,El Niño,,,,,,,,,,,,,,,,,\n"
+        "4,,Hände,,,,,,,,,,,,,,,,,\n"
+        "5,,Mötley Crüe,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="iso-8859-1")
+    return file_path
+
+
+def test_BEADChallengeDataValidator_with_files_encoded_in_cp1252(
+    temp_dir,
+    challenges_file_with_cp1252_chars,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+def test_BEADChallengeDataValidator_with_files_encoded_in_latin1(
+    temp_dir,
+    challenges_file_with_latin1_chars,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+def test_BEADChallengeDataValidator_with_files_encoded_in_iso_8859_1(
+    temp_dir,
+    challenges_file_with_iso_8859_1_chars,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+#########################################################
+# ########### Data Files Missing Columns ############## #
+#########################################################
+
+
+@pytest.fixture
+def challengers_file_without_id_column(temp_dir):
+    csv_content = (
+        "category,organization,webpage,provider_id,contact_name,"
+        "contact_email,contact_phone\n"
+        ",,,,,,\n"
+    )
+    file_path = temp_dir.join("challengers.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def challenges_file_without_id_column(temp_dir):
+    csv_content = (
+        "challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        ",,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def cai_file_without_id_column(temp_dir):
+    csv_content = (
+        "type,entity_number,CMS number,frn,location_id,"
+        "address_primary,city,state,zip_code,longitude,latitude,explanation,"
+        "need,availability\n"
+        ",,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("cai.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def cai_challenges_file_without_id_column(temp_dir):
+    csv_content = (
+        "challenge_type,challenger,category_code,disposition,"
+        "challenge_explanation,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        ",,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("cai_challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def post_challenge_cai_file_without_id_column(temp_dir):
+    csv_content = (
+        "type,entity_number,CMS number,frn,location_id,"
+        "address_primary,city,state,zip_code,longitude,latitude,explanation,"
+        "need,availability\n"
+        ",,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("post_challenge_cai.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def post_challenge_locations_file_without_id_column(temp_dir):
+    csv_content = "classification\n\n"
+    file_path = temp_dir.join("post_challenge_locations.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+def test_BEADChallengeDataValidator_with_files_with_id_columns_missing(
+    temp_dir,
+    challengers_file_without_id_column,
+    challenges_file_without_id_column,
+    cai_file_without_id_column,
+    cai_challenges_file_without_id_column,
+    post_challenge_cai_file_without_id_column,
+    post_challenge_locations_file_without_id_column,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    file_issues = [i for i in bcdv.issues if i["issue_type"] == "multi_file_validation"]
+    assert len(file_issues) == 2
+
+
+#########################################################
+# ################### Sample Data ##################### #
 #########################################################
 
 
@@ -153,7 +342,22 @@ def challenges_data_file(temp_dir):
         "reason_code,evidence_file_id,response_file_id,resolution,"
         "advertised_download_speed,download_speed,advertised_upload_speed,"
         "upload_speed,latency\n"
-        "2,,,,,,,,,,,,,,,,,,,\n"
+        "2,S,2,2024-03-29,2024-05-24,2024-07-04,S,717410,10,2754984828,,,age.pdf,"
+        "as.pdf,Lorem,106,1123,68,791,100.2\n"
+        "3,N,3,2024-05-19,,2024-07-01,A,579751,10,6982608163,,,wife.pdf,"
+        ",Scientist you to that open.,,333,,491,96.41\n"
+        "4,X,,2024-02-23,2024-05-10,2024-08-21,M,796614,0,8733869095,,,energy.pdf,"
+        "night.pdf,,365,82,1011,1071,164.25\n"
+        "5,T,5,2024-04-23,,2024-05-04,A,776568,60,1497861472,,,budget.pdf,"
+        ",Front much interview total executive hit.,1195,495,1032,295,43.764\n"
+        "6,L,6,2024-04-09,,2024-07-28,A,725620,10,3934728492,,,their.pdf,"
+        ",,728,1081,1101,414,26.1\n"
+        "7,V,7,2024-01-02,,2024-09-29,A,751131,61,6405418026,,,best.pdf,"
+        ",Take effect big bad.,1370,1045,1446,563,107.99762762202313\n"
+        "8,A,8,2024-05-13,2024-07-27,2024-11-19,M,935179,70,9913299240,,9,mouth.pdf,"
+        "treatment.pdf,Against daughter amount to play.,274,,226,,129.078\n"
+        "9,N,9,2024-02-08,2024-02-23,2024-03-27,M,400530,,8607048697,,,yourself.pdf,"
+        "information.pdf,Clear population perform.,40,1114,1178,1007,41.8\n"
     )
     file_path = temp_dir.join("challenges.csv")
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
@@ -167,7 +371,13 @@ def cai_data_file(temp_dir):
         "type,entity_name,entity_number,CMS number,frn,location_id,"
         "address_primary,city,state,zip_code,longitude,latitude,explanation,"
         "need,availability\n"
-        "2,,,,,,,,,,,,,,\n"
+        "C,2,,,,,5741 Warren St,Timothyport,NJ,07855,,,Words.,1000,530\n"
+        "F,3,,,,4670242652,,,UT,,,,Blue step southern minute state way.,1000,1430\n"
+        "H,4,,4854869256,9122416326,,,,ME,,-76.88442,40.2737,,1000,350\n"
+        "S,5,,,1336068487,,,,AZ,,-94.74049,32.5007,Field Congress,1000,450\n"
+        "P,6,,,,,,,CA,,-73.99681,40.94065,Throw often build anyone.,1000,310\n"
+        "G,7,,,,,,,CT,,-71.29144,41.54566,All memory.,1000,800\n"
+        "L,8,,,3283939845,,6859 Allen Canyon,Laurieton,VI,00801,,,Lorem.,1000,250\n"
     )
     file_path = temp_dir.join("cai.csv")
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
@@ -213,6 +423,102 @@ def challengers_data_file(temp_dir):
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
     create_csv_file(file_path, csv_lines)
     return file_path
+
+
+@pytest.fixture
+def post_challenge_cai_data_file(temp_dir):
+    csv_content = (
+        "type,entity_name,entity_number,CMS number,frn,location_id,"
+        "address_primary,city,state,zip_code,longitude,latitude,explanation,"
+        "need,availability\n"
+        "C,2,,,,,5741 Warren St,Timothyport,NJ,07855,,,Words.,1000,530\n"
+        "F,3,,,,4670242652,,,UT,,,,Blue step southern minute state way.,1000,1430\n"
+        "H,4,,4854869256,9122416326,,,,ME,,-76.88442,40.2737,,1000,350\n"
+        "S,5,,,1336068487,,,,AZ,,-94.74049,32.5007,Field Congress,1000,450\n"
+        "P,6,,,,,,,CA,,-73.99681,40.94065,Throw often build anyone.,1000,310\n"
+        "G,7,,,,,,,CT,,-71.29144,41.54566,All memory.,1000,800\n"
+        "L,8,,,3283939845,,6859 Allen Canyon,Laurieton,VI,00801,,,Lorem.,1000,250\n"
+    )
+    file_path = temp_dir.join("post_challenge_cai.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def post_challenge_locations_data_file(temp_dir):
+    csv_content = (
+        "location_id,classification\n"
+        "9251438703,2\n"
+        "9466464959,2\n"
+        "5832697349,1\n"
+        "6861164234,0\n"
+        "5157936221,1\n"
+        "9858021981,0\n"
+        "4555893936,2\n"
+        "1490692291,0\n"
+        "4138408302,1\n"
+        "2509942475,2\n"
+        "6770720004,0\n"
+    )
+    file_path = temp_dir.join("post_challenge_locations.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def unserved_data_file(temp_dir):
+    csv_content = (
+        "6861164234\n"
+        "9858021981\n"
+        "1490692291\n"
+        "6770720004\n"
+        "2535464157\n"
+        "9675783723\n"
+        "2326138798\n"
+        "3788764360\n"
+        "9777155993\n"
+        "5410470404\n"
+        "9146836216\n"
+        "6987623003\n"
+        "5080534585\n"
+        "8915454212\n"
+    )
+    file_path = temp_dir.join("unserved.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def underserved_data_file(temp_dir):
+    csv_content = (
+        "1173271099\n"
+        "5941169893\n"
+        "6971392161\n"
+        "5435463206\n"
+        "9983387865\n"
+        "3208742743\n"
+        "2754984828\n"
+        "3934728492\n"
+        "6405418026\n"
+        "4285253455\n"
+        "6060718635\n"
+        "7678465792\n"
+        "5747440694\n"
+        "4244932267\n"
+        "7451885843\n"
+    )
+    file_path = temp_dir.join("underserved.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+#########################################################
+# #################### Multi-File ##################### #
+#########################################################
 
 
 def test_multi_file_validations__cai_challenges_and_challengers(

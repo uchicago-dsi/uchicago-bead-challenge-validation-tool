@@ -186,15 +186,12 @@ class SingleFileValidator:
                     if i > (len(row) - 1):
                         num_cols_in_row_errors += 1
                         if num_cols_in_row_errors <= self.single_error_log_limit:
-                            try:
-                                id_col_value = row[self.id_column_index]
-                            except IndexError:
-                                id_col_value = (
-                                    "Missing the id_column at index "
-                                    f"{self.id_column_index}"
-                                )
                             row_col_failing_rows.append(
-                                (row[0] + self.row_offset, id_col_value, i)
+                                (
+                                    row[0] + self.row_offset,
+                                    self._get_id_column_value(row),
+                                    i,
+                                )
                             )
                         continue
                     if valid_column_type is not str:
@@ -208,15 +205,12 @@ class SingleFileValidator:
                             value = row[i]
                         except IndexError:
                             value = f"Missing column number {i} in this row"
-                        try:
-                            id_col_value = row[self.id_column_index]
-                        except IndexError:
-                            id_col_value = (
-                                "Missing the id_column at index "
-                                f"{self.id_column_index} in this row"
-                            )
                         dtype_failing_rows.append(
-                            (row[0] + self.row_offset, id_col_value, value)
+                            (
+                                row[0] + self.row_offset,
+                                self._get_id_column_value(row),
+                                value,
+                            )
                         )
                 except Exception as e:
                     self.issues.append(
@@ -266,6 +260,15 @@ class SingleFileValidator:
                     }
                 )
 
+    def _get_id_column_value(self, row: List) -> str:
+        try:
+            id_col_value = row[self.id_column_index]
+        except (IndexError, TypeError):
+            id_col_value = (
+                f"Missing the id_column (column number {self.id_column_index})"
+            )
+        return id_col_value
+
     def validate_column_non_nullness(self) -> None:
         for i, column in enumerate(self.csv_data_object.header):
             if column in self.nullable_columns:
@@ -279,7 +282,7 @@ class SingleFileValidator:
                         if num_null <= self.single_error_log_limit:
                             row_details = (
                                 row[0] + self.row_offset,
-                                row[self.id_column_index],
+                                self._get_id_column_value(row),
                                 row[i],
                             )
                             rows_w_null_col_val.append(row_details)
@@ -318,14 +321,10 @@ class SingleFileValidator:
                         if not col_validation.validate(row[col_index]):
                             num_errors += 1
                             if num_errors <= self.single_error_log_limit:
-                                if not self.id_column_index:
-                                    id_col_value = "missing_id_column"
-                                else:
-                                    id_col_value = row[self.id_column_index]
                                 failing_rows.append(
                                     (
                                         row[0] + self.row_offset,
-                                        id_col_value,
+                                        self._get_id_column_value(row),
                                         row[col_index],
                                     )
                                 )
@@ -375,7 +374,7 @@ class SingleFileValidator:
                         failing_rows.append(
                             (
                                 row[0] + self.row_offset,
-                                row[self.id_column_index],
+                                self._get_id_column_value(row),
                                 row,
                             )
                         )
@@ -927,9 +926,19 @@ class BEADChallengeDataValidator:
         )
         for data_format, file_path in self.data_format_to_path_map.items():
             data_validator_cls = self.data_format_validators.get(data_format)
-            data_validator = data_validator_cls(
-                file_path, single_error_log_limit=self.single_error_log_limit
-            )
+            try:
+                data_validator = data_validator_cls(
+                    file_path, single_error_log_limit=self.single_error_log_limit
+                )
+            except Exception:
+                print(
+                    "Encountered an unexpected error while attempting to validate the "
+                    f"{data_format}.csv data file. Please provide this error traceback"
+                    " to the bead_inspector maintainers via a GitHub Issue.\n"
+                    "https://github.com/uchicago-dsi/"
+                    "uchicago-bead-challenge-validation-tool/issues"
+                )
+                raise
             new_issues = data_validator.file_validator.issues
             if data_validator.file_validator.can_continue:
                 print(f"Ran single-file validations for the {data_format} format.")
@@ -955,22 +964,41 @@ class BEADChallengeDataValidator:
         self.output_results()
 
     def run_challenges_and_challengers_validations(self) -> None:
+        try:
+            challenges_data = self.data_format_validators["challenges"]
+            challenges_challengers = challenges_data.file_validator.csv_data_object[
+                "challenger"
+            ]
+            challengers_data = self.data_format_validators["challengers"]
+            challenger_challengers = challengers_data.file_validator.csv_data_object[
+                "challenger"
+            ]
+        except KeyError:
+            self.issues.append(
+                {
+                    "data_format": "challenges",
+                    "issue_type": "multi_file_validation",
+                    "issue_level": "error",
+                    "issue_details": {
+                        "other_data_format": "challengers",
+                        "short_msg": (
+                            "Missing column linking challengers.csv and "
+                            "challenges.csv"
+                        ),
+                        "long_msg": (
+                            "Couldn't compare the lists of challengers in the "
+                            "challenges.csv and challengers.csv datasets as one or"
+                            " both files are missing the 'challenger' column."
+                        ),
+                        "invalid_values": [{"missing_challenger_ids": "N/A"}],
+                    },
+                }
+            )
+            return
         challengers_in_challenges = list(
-            set(
-                el.lower()
-                for el in self.data_format_validators[
-                    "challenges"
-                ].file_validator.csv_data_object["challenger"]
-            )
+            set(el.lower() for el in challenges_challengers)
         )
-        registered_challengers = list(
-            set(
-                el.lower()
-                for el in self.data_format_validators[
-                    "challengers"
-                ].file_validator.csv_data_object["challenger"]
-            )
-        )
+        registered_challengers = list(set(el.lower() for el in challenger_challengers))
         unregistered_yet_submitting_challengers = list(
             {"missing_challenger_ids": c}
             for c in challengers_in_challenges
@@ -998,22 +1026,41 @@ class BEADChallengeDataValidator:
             )
 
     def run_cai_challenges_and_challengers_validations(self) -> None:
+        try:
+            cai_challenges_data = self.data_format_validators["cai_challenges"]
+            cai_challenges_challengers = (
+                cai_challenges_data.file_validator.csv_data_object["challenger"]
+            )
+            challengers_data = self.data_format_validators["challengers"]
+            challenger_challengers = challengers_data.file_validator.csv_data_object[
+                "challenger"
+            ]
+        except KeyError:
+            self.issues.append(
+                {
+                    "data_format": "cai_challenges",
+                    "issue_type": "multi_file_validation",
+                    "issue_level": "error",
+                    "issue_details": {
+                        "other_data_format": "challengers",
+                        "short_msg": (
+                            "Missing column linking challengers.csv and "
+                            "cai_challenges.csv"
+                        ),
+                        "long_msg": (
+                            "Couldn't compare the lists of challengers in the "
+                            "cai_challenges.csv and challengers.csv datasets as one or"
+                            " both files are missing the 'challenger' column."
+                        ),
+                        "invalid_values": [{"missing_challenger_ids": "N/A"}],
+                    },
+                }
+            )
+            return
         challengers_in_cai_challenges = list(
-            set(
-                el.lower()
-                for el in self.data_format_validators[
-                    "cai_challenges"
-                ].file_validator.csv_data_object["challenger"]
-            )
+            set(el.lower() for el in cai_challenges_challengers)
         )
-        registered_challengers = list(
-            set(
-                el.lower()
-                for el in self.data_format_validators[
-                    "challengers"
-                ].file_validator.csv_data_object["challenger"]
-            )
-        )
+        registered_challengers = list(set(el.lower() for el in challenger_challengers))
         unregistered_yet_submitting_challengers = list(
             {"missing_challenger_ids": c}
             for c in challengers_in_cai_challenges
