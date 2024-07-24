@@ -1,6 +1,6 @@
 import csv
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class EmptyFileError(Exception):
@@ -23,15 +23,46 @@ class CSVData:
         self.data = []
         self.load_file(self.file_name)
 
+    def detect_encoding(
+        self,
+        file_name: Path,
+        encodings: Tuple = (
+            "utf-8",
+            "latin1",
+            "utf-16",
+            "iso-8859-1",
+            "ascii",
+            "cp1252",
+        ),
+    ) -> str:
+        for encoding in encodings:
+            try:
+                with open(file_name, encoding=encoding) as f:
+                    f.read()
+                return encoding
+            except (UnicodeDecodeError, UnicodeError):
+                continue
+        raise ValueError("Unable to determine encoding")
+
     def load_file(self, file_name):
         """
         Load the CSV file, extract the header, and load the data with row
           indices.
         """
-        with open(file_name, mode="r", newline="") as file:
+        encoding = self.detect_encoding(file_name)
+        with open(file_name, mode="r", newline="", encoding=encoding) as file:
             csv_reader = csv.reader(file)
             self._set_header(csv_reader)
-            self.data = [[index] + row for index, row in enumerate(csv_reader)]
+            try:
+                for index, row in enumerate(csv_reader):
+                    self.data.append([index] + row)
+            except Exception:
+                print(
+                    f"Encountered an error while tring to read in file\n  {file_name}\n"
+                )
+                print(f"specifically while reading the line after row number {index}.")
+                print(f"row contents: {row}")
+                raise
 
     def _set_header(self, csv_reader) -> None:
         if len(self.header) == 0:

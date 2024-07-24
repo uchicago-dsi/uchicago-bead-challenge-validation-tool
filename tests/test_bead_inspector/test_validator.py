@@ -10,8 +10,8 @@ def temp_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("data")
 
 
-def create_csv_file(file_path, csv_data: str):
-    with open(file_path, "w+", newline="") as csvfile:
+def create_csv_file(file_path, csv_data: str, encoding: str = "utf-8"):
+    with open(file_path, "w+", newline="", encoding=encoding) as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_data)
 
@@ -137,6 +137,96 @@ def test_BEADChallengeDataValidator_with_some_files_missing(
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     file_issues = [i for i in bcdv.issues if i["issue_type"] == "missing_data_file"]
     assert set([i["data_format"] for i in file_issues]) == missing_formats
+
+
+#########################################################
+# ########### Data File Encoding Checks ############### #
+#########################################################
+
+
+@pytest.fixture
+def challenges_file_with_cp1252_chars(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+        "3,,“windows double quote marks”,,,,,,,,,,,,,,,,,\n"
+        "4,,‘windows single quote marks’,,,,,,,,,,,,,,,,,\n"
+        "5,,Euro sign: € (U+20AC),,,,,,,,,,,,,,,,,\n"
+        "6,,Euro sign: € (U+20AC),,,,,,,,,,,,,,,,,\n"
+        "7,,Trademark sign: ™ (U+2122),,,,,,,,,,,,,,,,,\n"
+        "8,,Bullet: • (U+2022),,,,,,,,,,,,,,,,,\n"
+        "9,,Ellipsis: … (U+2026),,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="cp1252")
+    return file_path
+
+
+@pytest.fixture
+def challenges_file_with_latin1_chars(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,Résumé,,,,,,,,,,,,,,,,,\n"
+        "3,,El Niño,,,,,,,,,,,,,,,,,\n"
+        "4,,Hände,,,,,,,,,,,,,,,,,\n"
+        "5,,Mötley Crüe,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="latin1")
+    return file_path
+
+
+@pytest.fixture
+def challenges_file_with_iso_8859_1_chars(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,Résumé,,,,,,,,,,,,,,,,,\n"
+        "3,,El Niño,,,,,,,,,,,,,,,,,\n"
+        "4,,Hände,,,,,,,,,,,,,,,,,\n"
+        "5,,Mötley Crüe,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="iso-8859-1")
+    return file_path
+
+
+def test_BEADChallengeDataValidator_with_files_encoded_in_cp1252(
+    temp_dir,
+    challenges_file_with_cp1252_chars,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+def test_BEADChallengeDataValidator_with_files_encoded_in_latin1(
+    temp_dir,
+    challenges_file_with_latin1_chars,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+def test_BEADChallengeDataValidator_with_files_encoded_in_iso_8859_1(
+    temp_dir,
+    challenges_file_with_iso_8859_1_chars,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
 
 
 #########################################################
