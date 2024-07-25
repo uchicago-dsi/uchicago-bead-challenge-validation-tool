@@ -374,7 +374,7 @@ class ReportGenerator:
             f"{toc_descr}:</h3>{self.LINK_TO_TOC}"
             f"<ul><li>Data File: {expected_file_name}</li>"
             f"<li>Issue Level: {issue_level}</li>"
-            f"<li>Intended datatype: {html.escape(intended_type)}</li>"
+            f"<li>Intended datatype: {html.escape(str(intended_type))}</li>"
             "<li>Failing rows and their uncastable values:"
             f"{self._list_to_html_table(failing_rows)}</li>{trunc_note}"
             "<li>Total number of rows with uncastable values: "
@@ -675,7 +675,7 @@ class ReportGenerator:
         ) = self._unpack_core_issue_fields(issue)
         assert issue_type == "column_dtype_validation_misc"
         expected_file_name = f"{data_format}.csv"
-        row_number = html.escape(issue_details["row_number"])
+        row_number = issue_details["row_number"]
         column = html.escape(issue_details["column"])
         error_msg = html.escape(issue_details["error_msg"])
         error_type = html.escape(issue_details["error_type"])
