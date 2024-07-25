@@ -358,6 +358,8 @@ def challenges_data_file(temp_dir):
         "treatment.pdf,Against daughter amount to play.,274,,226,,129.078\n"
         "9,N,9,2024-02-08,2024-02-23,2024-03-27,M,400530,,8607048697,,,yourself.pdf,"
         "information.pdf,Clear population perform.,40,1114,1178,1007,41.8\n"
+        "10,V,606,2024-01-16,,,A,131955,70,7441127180,,,find.pdf,,Paper co lawyer,"
+        "351,528,857,149,197.65\n"
     )
     file_path = temp_dir.join("challenges.csv")
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
@@ -527,6 +529,24 @@ def test_multi_file_validations__cai_challenges_and_challengers(
     cai_challenges_data_file,
 ):
     missing_challenger_ids = {"1234"}
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    multi_file_issues = [
+        i for i in bcdv.issues if i["issue_type"] == "multi_file_validation"
+    ]
+    assert len(multi_file_issues) == 1
+    invalid_valids = multi_file_issues[0]["issue_details"]["invalid_values"]
+    assert (
+        set([i["missing_challenger_ids"] for i in invalid_valids])
+        == missing_challenger_ids
+    )
+
+
+def test_multi_file_validations__challenges_and_challengers(
+    temp_dir,
+    challengers_data_file,
+    challenges_data_file,
+):
+    missing_challenger_ids = {"", "606"}
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     multi_file_issues = [
         i for i in bcdv.issues if i["issue_type"] == "multi_file_validation"

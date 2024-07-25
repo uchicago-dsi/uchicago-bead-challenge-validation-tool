@@ -50,7 +50,7 @@ exclude = [
     ".tox",
     ".venv",
     "__pycache__",
-    "_version.py",
+    "src/bead_inspector/_version.py",
     "*.egg-info",
     "build",
     "dist",
