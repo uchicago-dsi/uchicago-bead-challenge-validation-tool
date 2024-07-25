@@ -50,6 +50,7 @@ exclude = [
     ".tox",
     ".venv",
     "__pycache__",
+    "_version.py",
     "*.egg-info",
     "build",
     "dist",
