@@ -3887,6 +3887,49 @@ def test_cai_challenges_column_dtypes__availability():
         assert all(r in failing_rows for r in invalid_value_rows)
 
 
+def test_cai_challenges_col_content__challenge():
+    csv_content = (
+        "challenge,challenge_type,challenger,category_code,disposition,"
+        "challenge_explanation,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        "eoEYUCTZHR-corE3xwTq5S-LowMQ7QVt8-f7XpDG9dZgm8z3nK,2,,,,,,,,,,,,,,,,,,,\n"
+        "Xnow432nXcjgodiDY8F-YipaGRhV24iYQRBPeW6LzoN6piXHFgW,3,,,,,,,,,,,,,,,,,,,\n"
+        "a_iDY8F-Yi_V123456789XHFg,4,,,,,,,,,,,,,,,,,,,\n"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvwxy,5,,,,,,,,,,,,,,,,,,,\n"
+        "a1,6,,,,,,,,,,,,,,,,,,,\n"
+        "abcde-12345,7,,,,,,,,,,,,,,,,,,,\n"
+        "abcde-12345!,8,,,,,,,,,,,,,,,,,,,\n"
+        ",9,,,,,,,,,,,,,,,,,,,\n"
+    )
+    over_length_rows = [3]
+    invalid_char_rows = [4, 8]
+    null_char_rows = [9]
+    invalid_value_rows = [*over_length_rows, *invalid_char_rows, *null_char_rows]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.ChallengesDataValidator(tf.name)
+        issues = _validator.file_validator.issues
+
+        col_contents_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_contents_validation"
+        ]
+        row_fails = [
+            i["failing_rows_and_values"]
+            for i in col_contents_issues
+            if i["column"] == "challenge"
+        ]
+        assert len(row_fails) == 1
+        failing_rows = [row for row, id_col, col in row_fails[0]]
+        assert all(r in failing_rows for r in over_length_rows)
+        assert all(r in failing_rows for r in invalid_char_rows)
+        assert all(r in failing_rows for r in null_char_rows)
+        assert set(failing_rows) == set(invalid_value_rows)
+
+
 def test_cai_challenges_col_content__challenge_type():
     csv_content = (
         "challenge,challenge_type,challenger,category_code,disposition,"
@@ -4378,6 +4421,85 @@ def test_cai_challenge_row_rule__frn_given_type():
 ###########################################################
 # ############# Post Challenge Locations ################ #
 ###########################################################
+
+
+def test_post_challenge_location__column_names():
+    csv_content = "location_id,location_class\n"
+    missing_column_names = ["classification"]
+    extra_column_names = ["location_class"]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.PostChallengeLocationDataValidator(tf.name)
+        issues = _validator.file_validator.issues
+
+        test_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_name_validation"
+        ]
+        assert len(test_issues) == 1
+        assert list(test_issues[0].keys()) == [
+            "columns_missing_from_file",
+            "extra_columns_in_file",
+        ]
+        assert set(test_issues[0]["columns_missing_from_file"]) == set(
+            missing_column_names
+        )
+        assert set(test_issues[0]["extra_columns_in_file"]) == set(extra_column_names)
+
+
+def test_post_challenge_location__column_order():
+    csv_content = "index,classification,location_id\n"
+    col_numbers_w_wrong_names = [1, 3]
+    expected_cols_not_in_expected_place = ["location_id", "<missing_column>"]
+    file_col_names_in_wrong_place = [
+        "index",
+        "location_id",
+    ]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.PostChallengeLocationDataValidator(tf.name)
+        issues = _validator.file_validator.issues
+
+        test_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_order_validation"
+        ]
+        assert len(test_issues) == 1
+        cols_out_of_order = test_issues[0]["cols_out_of_order"]
+        print(cols_out_of_order)
+        assert all(
+            list(el.keys())
+            == ["column_number", "expected_column_name", "column_name_in_file"]
+            for el in cols_out_of_order
+        )
+        missing_expected_cols_w_missings = [
+            el["expected_column_name"] for el in cols_out_of_order
+        ]
+        misordered_expected_col_names = [
+            c for c in missing_expected_cols_w_missings if c != "<missing_column>"
+        ]
+        misordered_col_names_in_file_w_missings = [
+            el["column_name_in_file"] for el in cols_out_of_order
+        ]
+        misordered_col_names_in_file = [
+            c
+            for c in misordered_col_names_in_file_w_missings
+            if c != "<missing_column>"
+        ]
+        assert set(misordered_expected_col_names) == set(
+            expected_cols_not_in_expected_place
+        )
+        assert set(misordered_col_names_in_file) == set(file_col_names_in_wrong_place)
+        assert set(el["column_name_in_file"] for el in cols_out_of_order) == set(
+            file_col_names_in_wrong_place
+        )
+        assert [
+            el["column_number"] for el in cols_out_of_order
+        ] == col_numbers_w_wrong_names
 
 
 def test_post_challenge_location_column_dtypes__location_id():
