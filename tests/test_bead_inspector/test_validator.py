@@ -358,6 +358,8 @@ def challenges_data_file(temp_dir):
         "treatment.pdf,Against daughter amount to play.,274,,226,,129.078\n"
         "9,N,9,2024-02-08,2024-02-23,2024-03-27,M,400530,,8607048697,,,yourself.pdf,"
         "information.pdf,Clear population perform.,40,1114,1178,1007,41.8\n"
+        "10,V,606,2024-01-16,,,A,131955,70,7441127180,,,find.pdf,,Paper co lawyer,"
+        "351,528,857,149,197.65\n"
     )
     file_path = temp_dir.join("challenges.csv")
     csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
@@ -527,6 +529,24 @@ def test_multi_file_validations__cai_challenges_and_challengers(
     cai_challenges_data_file,
 ):
     missing_challenger_ids = {"1234"}
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    multi_file_issues = [
+        i for i in bcdv.issues if i["issue_type"] == "multi_file_validation"
+    ]
+    assert len(multi_file_issues) == 1
+    invalid_valids = multi_file_issues[0]["issue_details"]["invalid_values"]
+    assert (
+        set([i["missing_challenger_ids"] for i in invalid_valids])
+        == missing_challenger_ids
+    )
+
+
+def test_multi_file_validations__challenges_and_challengers(
+    temp_dir,
+    challengers_data_file,
+    challenges_data_file,
+):
+    missing_challenger_ids = {"", "606"}
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     multi_file_issues = [
         i for i in bcdv.issues if i["issue_type"] == "multi_file_validation"
@@ -3867,6 +3887,49 @@ def test_cai_challenges_column_dtypes__availability():
         assert all(r in failing_rows for r in invalid_value_rows)
 
 
+def test_cai_challenges_col_content__challenge():
+    csv_content = (
+        "challenge,challenge_type,challenger,category_code,disposition,"
+        "challenge_explanation,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        "eoEYUCTZHR-corE3xwTq5S-LowMQ7QVt8-f7XpDG9dZgm8z3nK,2,,,,,,,,,,,,,,,,,,,\n"
+        "Xnow432nXcjgodiDY8F-YipaGRhV24iYQRBPeW6LzoN6piXHFgW,3,,,,,,,,,,,,,,,,,,,\n"
+        "a_iDY8F-Yi_V123456789XHFg,4,,,,,,,,,,,,,,,,,,,\n"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvwxy,5,,,,,,,,,,,,,,,,,,,\n"
+        "a1,6,,,,,,,,,,,,,,,,,,,\n"
+        "abcde-12345,7,,,,,,,,,,,,,,,,,,,\n"
+        "abcde-12345!,8,,,,,,,,,,,,,,,,,,,\n"
+        ",9,,,,,,,,,,,,,,,,,,,\n"
+    )
+    over_length_rows = [3]
+    invalid_char_rows = [4, 8]
+    null_char_rows = [9]
+    invalid_value_rows = [*over_length_rows, *invalid_char_rows, *null_char_rows]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.ChallengesDataValidator(tf.name)
+        issues = _validator.file_validator.issues
+
+        col_contents_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_contents_validation"
+        ]
+        row_fails = [
+            i["failing_rows_and_values"]
+            for i in col_contents_issues
+            if i["column"] == "challenge"
+        ]
+        assert len(row_fails) == 1
+        failing_rows = [row for row, id_col, col in row_fails[0]]
+        assert all(r in failing_rows for r in over_length_rows)
+        assert all(r in failing_rows for r in invalid_char_rows)
+        assert all(r in failing_rows for r in null_char_rows)
+        assert set(failing_rows) == set(invalid_value_rows)
+
+
 def test_cai_challenges_col_content__challenge_type():
     csv_content = (
         "challenge,challenge_type,challenger,category_code,disposition,"
@@ -3941,6 +4004,181 @@ def test_cai_challenges_col_content__challenge_type():
             i["failing_rows_and_values"]
             for i in col_contents_issues
             if i["column"] == "challenge_type"
+        ]
+        assert len(row_fails) == 1
+        failing_rows = [row for row, id_col, col in row_fails[0]]
+        assert failing_rows == invalid_value_rows
+        assert all(r in failing_rows for r in invalid_value_rows)
+
+
+def test_cai_challenges_col_content__category_code():
+    csv_content = (
+        "challenge,challenge_type,challenger,category_code,disposition,"
+        "challenge_explanation,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        "2,,,X,,,,,,,,,,,,,,,,,\n"
+        "3,,,N,,,,,,,,,,,,,,,,,\n"
+        "4,,,A,,,,,,,,,,,,,,,,,\n"
+        "5,,,1,,,,,,,,,,,,,,,,,\n"
+        "6,,,B,,,,,,,,,,,,,,,,,\n"
+        "7,,,I,,,,,,,,,,,,,,,,,\n"
+        "8,,,R,,,,,,,,,,,,,,,,,\n"
+        "9,,,D,,,,,,,,,,,,,,,,,\n"
+        "10,,,BIRD,,,,,,,,,,,,,,,,,\n"
+        "11,,,I,,,,,,,,,,,,,,,,,\n"
+        "12,,,T,,,,,,,,,,,,,,,,,\n"
+        "13,,,0,,,,,,,,,,,,,,,,,\n"
+        "14,,,C,,,,,,,,,,,,,,,,,\n"
+        "15,,,O,,,,,,,,,,,,,,,,,\n"
+        "16,,,E,,,,,,,,,,,,,,,,,\n"
+        "17,,,F,,,,,,,,,,,,,,,,,\n"
+        "18,,,G,,,,,,,,,,,,,,,,,\n"
+        "19,,,Q,,,,,,,,,,,,,,,,,\n"
+        "20,,,,,,,,,,,,,,,,,,,,\n"
+    )
+    invalid_value_rows = [4, 5, 10, 13, 14, 16, 17, 18, 19]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.CAIChallengeDataValidator(tf.name, 1000)
+        issues = _validator.file_validator.issues
+
+        col_contents_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_contents_validation"
+        ]
+        row_fails = [
+            i["failing_rows_and_values"]
+            for i in col_contents_issues
+            if i["column"] == "category_code"
+        ]
+        assert len(row_fails) == 1
+        failing_rows = [row for row, id_col, col in row_fails[0]]
+        assert failing_rows == invalid_value_rows
+        assert all(r in failing_rows for r in invalid_value_rows)
+
+
+def test_cai_challenges_col_content__disposition():
+    csv_content = (
+        "challenge,challenge_type,challenger,category_code,disposition,"
+        "challenge_explanation,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        "2,,,,I,,,,,,,,,,,,,,,,\n"
+        "3,,,,1,,,,,,,,,,,,,,,,\n"
+        "4,,,,M,,,,,,,,,,,,,,,,\n"
+        "5,,,,N,,,,,,,,,,,,,,,,\n"
+        "6,,,,B,,,,,,,,,,,,,,,\n"
+        "7,,,,C,,,,,,,,,,,,,,,,\n"
+        "8,,,,G,,,,,,,,,,,,,,,,\n"
+        "9,,,,A,,,,,,,,,,,,,,,,\n"
+        "10,,,,Q,,,,,,,,,,,,,,,,\n"
+        "11,,,,R,,,,,,,,,,,,,,,,\n"
+        "12,,,,,,,,,,,,,,,,,,,,\n"
+        "13,,,,S,,,,,,,,,,,,,,,,\n"
+        "14,,,,T,,,,,,,,,,,,,,,,\n"
+        "15,,,,X,,,,,,,,,,,,,,,,\n"
+    )
+    invalid_value_rows = [3, 4, 6, 7, 8, 10, 12, 14, 15]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.CAIChallengeDataValidator(tf.name, 1000)
+        issues = _validator.file_validator.issues
+
+        col_contents_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_contents_validation"
+        ]
+        row_fails = [
+            i["failing_rows_and_values"]
+            for i in col_contents_issues
+            if i["column"] == "disposition"
+        ]
+        assert len(row_fails) == 1
+        failing_rows = [row for row, id_col, col in row_fails[0]]
+        assert failing_rows == invalid_value_rows
+        assert all(r in failing_rows for r in invalid_value_rows)
+
+
+def test_cai_challenges_col_content__type():
+    csv_content = (
+        "challenge,challenge_type,challenger,category_code,disposition,"
+        "challenge_explanation,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        "2,,,,,,S,,,,,,,,,,,,,,\n"
+        "3,,,,,,5,,,,,,,,,,,,,,\n"
+        "4,,,,,,L,,,,,,,,,,,,,,\n"
+        "5,,,,,,G,,,,,,,,,,,,,,\n"
+        "6,,,,,,Z,,,,,,,,,,,,,\n"
+        "7,,,,,,H,,,,,,,,,,,,,,\n"
+        "8,,,,,,,,,,,,,,,,,,,,\n"
+        "9,,,,,,C,,,,,,,,,,,,,,\n"
+        "10,,,,,,P,,,,,,,,,,,,,,\n"
+        "11,,,,,,A,,,,,,,,,,,,,,\n"
+        "12,,,,,,F,,,,,,,,,,,,,,\n"
+        "13,,,,,,SL,,,,,,,,,,,,,,\n"
+        "14,,,,,,s,,,,,,,,,,,,,,\n"
+        "15,,,,,,l,,,,,,,,,,,,,,\n"
+    )
+    invalid_value_rows = [3, 6, 8, 11, 13, 14, 15]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.CAIChallengeDataValidator(tf.name, 1000)
+        issues = _validator.file_validator.issues
+
+        col_contents_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_contents_validation"
+        ]
+        row_fails = [
+            i["failing_rows_and_values"]
+            for i in col_contents_issues
+            if i["column"] == "type"
+        ]
+        assert len(row_fails) == 1
+        failing_rows = [row for row, id_col, col in row_fails[0]]
+        assert failing_rows == invalid_value_rows
+        assert all(r in failing_rows for r in invalid_value_rows)
+
+
+def test_cai_challenges_col_content__location_id():
+    csv_content = (
+        "challenge,challenge_type,challenger,category_code,disposition,"
+        "challenge_explanation,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        "2,,,,,,,,,,,1234567890,,,,,,,,,\n"
+        "3,,,,,,,,,,,,,,,,,,,,\n"
+        "4,,,,,,,,,,,A234567890,,,,,,,,,\n"
+        "5,,,,,,,,,,,999999999,,,,,,,,,\n"
+        "6,,,,,,,,,,,1000000000,,,,,,,,,\n"
+        "7,,,,,,,,,,,9999999999,,,,,,,,,\n"
+        "8,,,,,,,,,,,10000000000,,,,,,,,,\n"
+        "9,,,,,,,,,,,0100000000,,,,,,,,,\n"
+    )
+    invalid_value_rows = [4, 5, 8, 9]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.CAIChallengeDataValidator(tf.name, 1000)
+        issues = _validator.file_validator.issues
+
+        col_contents_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_contents_validation"
+        ]
+        row_fails = [
+            i["failing_rows_and_values"]
+            for i in col_contents_issues
+            if i["column"] == "location_id"
         ]
         assert len(row_fails) == 1
         failing_rows = [row for row, id_col, col in row_fails[0]]
@@ -4358,6 +4596,84 @@ def test_cai_challenge_row_rule__frn_given_type():
 ###########################################################
 # ############# Post Challenge Locations ################ #
 ###########################################################
+
+
+def test_post_challenge_location__column_names():
+    csv_content = "location_id,location_class\n"
+    missing_column_names = ["classification"]
+    extra_column_names = ["location_class"]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.PostChallengeLocationDataValidator(tf.name)
+        issues = _validator.file_validator.issues
+
+        test_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_name_validation"
+        ]
+        assert len(test_issues) == 1
+        assert list(test_issues[0].keys()) == [
+            "columns_missing_from_file",
+            "extra_columns_in_file",
+        ]
+        assert set(test_issues[0]["columns_missing_from_file"]) == set(
+            missing_column_names
+        )
+        assert set(test_issues[0]["extra_columns_in_file"]) == set(extra_column_names)
+
+
+def test_post_challenge_location__column_order():
+    csv_content = "index,classification,location_id\n"
+    col_numbers_w_wrong_names = [1, 3]
+    expected_cols_not_in_expected_place = ["location_id"]
+    file_col_names_in_wrong_place = [
+        "index",
+        "location_id",
+    ]
+    with tempfile.NamedTemporaryFile(delete=False, mode="w+", newline="") as tf:
+        tf.write(csv_content)
+        tf.seek(0)
+        _validator = validator.PostChallengeLocationDataValidator(tf.name)
+        issues = _validator.file_validator.issues
+
+        test_issues = [
+            i["issue_details"]
+            for i in issues
+            if i["issue_type"] == "column_order_validation"
+        ]
+        assert len(test_issues) == 1
+        cols_out_of_order = test_issues[0]["cols_out_of_order"]
+        assert all(
+            list(el.keys())
+            == ["column_number", "expected_column_name", "column_name_in_file"]
+            for el in cols_out_of_order
+        )
+        missing_expected_cols_w_missings = [
+            el["expected_column_name"] for el in cols_out_of_order
+        ]
+        misordered_expected_col_names = [
+            c for c in missing_expected_cols_w_missings if c != "<missing_column>"
+        ]
+        misordered_col_names_in_file_w_missings = [
+            el["column_name_in_file"] for el in cols_out_of_order
+        ]
+        misordered_col_names_in_file = [
+            c
+            for c in misordered_col_names_in_file_w_missings
+            if c != "<missing_column>"
+        ]
+        assert set(misordered_expected_col_names) == set(
+            expected_cols_not_in_expected_place
+        )
+        assert set(misordered_col_names_in_file) == set(file_col_names_in_wrong_place)
+        assert set(el["column_name_in_file"] for el in cols_out_of_order) == set(
+            file_col_names_in_wrong_place
+        )
+        assert [
+            el["column_number"] for el in cols_out_of_order
+        ] == col_numbers_w_wrong_names
 
 
 def test_post_challenge_location_column_dtypes__location_id():

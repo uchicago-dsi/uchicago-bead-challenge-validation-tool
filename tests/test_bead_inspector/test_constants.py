@@ -331,6 +331,17 @@ def test_DispositionsOfChallenge_validator():
     assert vfunc("") is False  # Nulls are prohibited
 
 
+def test_DispositionsOfCAIChallenge_validator():
+    vfunc = constants.DispositionsOfCAIChallenge.validator()
+    valid_values = ["I", "N", "A", "S", "R"]
+    for char in [*list(string.ascii_letters + string.digits)]:
+        if char in valid_values:
+            assert vfunc(char) is True
+        else:
+            assert vfunc(char) is False
+    assert vfunc("") is False  # Nulls are prohibited
+
+
 def test_FrnNullableValidator():
     vfunc = constants.FrnNullableValidator.validator()
     assert vfunc("123456") is False
