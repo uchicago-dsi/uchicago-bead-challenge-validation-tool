@@ -135,7 +135,12 @@ class ReportGenerator:
         self.issues = self._read_issues_from_file(self.issues_file_path)
         self.issues = sorted(
             self.issues,
-            key=lambda x: (x["issue_level"], x["data_format"], x["issue_type"]),
+            key=lambda x: (
+                x["issue_level"],
+                x["data_format"],
+                x["issue_sort_order"],
+                x["issue_type"],
+            ),
         )
 
     def _get_class_attributes(self, module_name: str, class_name: str) -> Dict:
@@ -359,7 +364,7 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "03_column_dtype_validation"
+        assert issue_type == "column_dtype_validation"
         expected_file_name = f"{data_format}.csv"
         column = issue_details["column"]
         id_column = issue_details["id_column"]
@@ -484,7 +489,7 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "00_column_name_validation"
+        assert issue_type == "column_name_validation"
         expected_file_name = f"{data_format}.csv"
         missing_cols = issue_details["columns_missing_from_file"]
         extra_cols = issue_details["extra_columns_in_file"]
@@ -529,7 +534,7 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "01_column_order_validation"
+        assert issue_type == "column_order_validation"
         expected_file_name = f"{data_format}.csv"
         cols_out_of_order = issue_details["cols_out_of_order"]
         toc_descr = f"{expected_file_name} :: Incorrect column order"
@@ -553,7 +558,7 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "02_unexpected_column_found"
+        assert issue_type == "unexpected_column_found"
         expected_file_name = f"{data_format}.csv"
         column = issue_details["column"]
         toc_descr = f"{expected_file_name} :: Unexpected column ('{column}') found"
@@ -741,22 +746,22 @@ class ReportGenerator:
             toc_line, formatted_issue = self._format_data_loading_failure_issue(
                 issue, issue_number
             )
-        elif issue_type == "00_column_name_validation":
+        elif issue_type == "column_name_validation":
             (
                 toc_line,
                 formatted_issue,
             ) = self._format_column_name_validation_issue(issue, issue_number)
-        elif issue_type == "01_column_order_validation":
+        elif issue_type == "column_order_validation":
             (
                 toc_line,
                 formatted_issue,
             ) = self._format_column_order_validation_issue(issue, issue_number)
-        elif issue_type == "02_unexpected_column_found":
+        elif issue_type == "unexpected_column_found":
             (
                 toc_line,
                 formatted_issue,
             ) = self._format_unexpected_column_found_issue(issue, issue_number)
-        elif issue_type == "03_column_dtype_validation":
+        elif issue_type == "column_dtype_validation":
             (
                 toc_line,
                 formatted_issue,

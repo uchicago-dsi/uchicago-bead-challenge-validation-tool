@@ -75,6 +75,7 @@ class SingleFileValidator:
                     "data_format": self.data_format,
                     "issue_type": "file_not_found",
                     "issue_level": "error",
+                    "issue_sort_order": 0,
                     "issue_details": {
                         "msg": f"Expected a CSV file in location {file_path}",
                     },
@@ -88,6 +89,7 @@ class SingleFileValidator:
                     "data_format": self.data_format,
                     "issue_type": "empty_file_error",
                     "issue_level": "error",
+                    "issue_sort_order": 0,
                     "issue_details": {},
                 }
             )
@@ -99,6 +101,7 @@ class SingleFileValidator:
                     "data_format": self.data_format,
                     "issue_type": "data_loading_failure",
                     "issue_level": "error",
+                    "issue_sort_order": 0,
                     "issue_details": {
                         "msg": "Encountered an unexpected error",
                         "error_msg": str(e),
@@ -125,8 +128,9 @@ class SingleFileValidator:
             self.issues.append(
                 {
                     "data_format": self.data_format,
-                    "issue_type": "00_column_name_validation",
+                    "issue_type": "column_name_validation",
                     "issue_level": "error",
+                    "issue_sort_order": 0,
                     "issue_details": {
                         "columns_missing_from_file": list(missing_cols),
                         "extra_columns_in_file": list(extra_cols),
@@ -155,8 +159,9 @@ class SingleFileValidator:
             self.issues.append(
                 {
                     "data_format": self.data_format,
-                    "issue_type": "01_column_order_validation",
+                    "issue_type": "column_order_validation",
                     "issue_level": "error",
+                    "issue_sort_order": 1,
                     "issue_details": {"cols_out_of_order": cols_out_of_order},
                 }
             )
@@ -175,8 +180,9 @@ class SingleFileValidator:
                 self.issues.append(
                     {
                         "data_format": self.data_format,
-                        "issue_type": "02_unexpected_column_found",
+                        "issue_type": "unexpected_column_found",
                         "issue_level": "error",
+                        "issue_sort_order": 2,
                         "issue_details": {"column": column},
                     }
                 )
@@ -222,6 +228,7 @@ class SingleFileValidator:
                             "data_format": self.data_format,
                             "issue_type": "column_dtype_validation_misc",
                             "issue_level": "error",
+                            "issue_sort_order": 4,
                             "issue_details": {
                                 "row_number": row[0],
                                 "column": column,
@@ -234,8 +241,9 @@ class SingleFileValidator:
                 self.issues.append(
                     {
                         "data_format": self.data_format,
-                        "issue_type": "03_column_dtype_validation",
+                        "issue_type": "column_dtype_validation",
                         "issue_level": "error",
+                        "issue_sort_order": 3,
                         "issue_details": {
                             "column": column,
                             "id_column": self.id_column,
@@ -252,6 +260,7 @@ class SingleFileValidator:
                         "data_format": self.data_format,
                         "issue_type": "enough_columns_validation",
                         "issue_level": "error",
+                        "issue_sort_order": 0,
                         "issue_details": {
                             "column": column,
                             "id_column": self.id_column,
@@ -305,6 +314,7 @@ class SingleFileValidator:
                         "data_format": self.data_format,
                         "issue_type": "required_column_not_null_validation",
                         "issue_level": "error",
+                        "issue_sort_order": 5,
                         "issue_details": {
                             "column": column,
                             "id_column": self.id_column,
@@ -347,6 +357,7 @@ class SingleFileValidator:
                             "data_format": self.data_format,
                             "issue_type": "column_contents_validation",
                             "issue_level": col_validation.issue_level,
+                            "issue_sort_order": 10,
                             "issue_details": {
                                 "column": column,
                                 "id_column": self.id_column,
@@ -364,6 +375,7 @@ class SingleFileValidator:
                         "data_format": self.data_format,
                         "issue_type": "column_missing",
                         "issue_level": col_validation.issue_level,
+                        "issue_sort_order": 1,
                         "issue_details": {
                             "column": column,
                         },
@@ -391,6 +403,7 @@ class SingleFileValidator:
                         "data_format": self.data_format,
                         "issue_type": "row_rule_validation",
                         "issue_level": row_validation.issue_level,
+                        "issue_sort_order": 15,
                         "issue_details": {
                             "rule_descr": row_validation.validation.rule_descr,
                             "id_column": self.id_column,
@@ -921,6 +934,7 @@ class BEADChallengeDataValidator:
                         "data_format": missing_data_format,
                         "issue_type": "missing_data_file",
                         "issue_level": "error",
+                        "issue_sort_order": 0,
                         "issue_details": {"data_dir": str(self.data_dir)},
                     }
                 )
@@ -986,6 +1000,7 @@ class BEADChallengeDataValidator:
                     "data_format": "challenges",
                     "issue_type": "multi_file_validation",
                     "issue_level": "error",
+                    "issue_sort_order": 20,
                     "issue_details": {
                         "other_data_format": "challengers",
                         "short_msg": (
@@ -1017,6 +1032,7 @@ class BEADChallengeDataValidator:
                     "data_format": "challenges",
                     "issue_type": "multi_file_validation",
                     "issue_level": "error",
+                    "issue_sort_order": 20,
                     "issue_details": {
                         "other_data_format": "challengers",
                         "short_msg": (
@@ -1048,6 +1064,7 @@ class BEADChallengeDataValidator:
                     "data_format": "cai_challenges",
                     "issue_type": "multi_file_validation",
                     "issue_level": "error",
+                    "issue_sort_order": 20,
                     "issue_details": {
                         "other_data_format": "challengers",
                         "short_msg": (
@@ -1079,6 +1096,7 @@ class BEADChallengeDataValidator:
                     "data_format": "cai_challenges",
                     "issue_type": "multi_file_validation",
                     "issue_level": "error",
+                    "issue_sort_order": 20,
                     "issue_details": {
                         "other_data_format": "challengers",
                         "short_msg": (
@@ -1099,7 +1117,13 @@ class BEADChallengeDataValidator:
             print(self.issues)
         else:
             self.issues = sorted(
-                self.issues, key=lambda x: (x["issue_level"], x["issue_type"])
+                self.issues,
+                key=lambda x: (
+                    x["issue_level"],
+                    x["data_format"],
+                    x["issue_sort_order"],
+                    x["issue_type"],
+                ),
             )
             write_issues_to_json(issues=self.issues, file_path=self.log_path)
         print(f"Number of issues (or types of issues) found: {len(self.issues)}")

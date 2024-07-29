@@ -419,7 +419,98 @@ def test_BEADChallengeDataValidator_with_files_with_extra_trailing_columns(
         i for i in bcdv.issues if i["issue_type"] == "column_dtype_validation_misc"
     ]
     col_name_issues = [
-        i for i in bcdv.issues if i["issue_type"] == "00_column_name_validation"
+        i for i in bcdv.issues if i["issue_type"] == "column_name_validation"
+    ]
+    assert len(misc_issues) == 0
+    assert len(col_name_issues) == 5
+
+
+@pytest.fixture
+def challenges_file_with_extra_non_trailing_columns(temp_dir):
+    csv_content = (
+        "pk_column,content_hash,challenge,challenge_type,challenger,challenge_date,"
+        "rebuttal_date,resolution_date,disposition,provider_id,technology,location_id,"
+        "unit,reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        ",,,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def challengers_file_with_extra_non_trailing_columns(temp_dir):
+    csv_content = (
+        "pk_column,content_hash,challenger,category,organization,webpage,provider_id,"
+        "contact_name,contact_email,contact_phone\n"
+        ",,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challengers.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def post_challenge_cai_file_with_extra_non_trailing_columns(temp_dir):
+    csv_content = (
+        "pk_column,content_hash,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        ",,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("post_challenge_cai.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def cai_file_with_extra_non_trailing_columns(temp_dir):
+    csv_content = (
+        "pk_column,content_hash,type,entity_name,entity_number,CMS number,frn,"
+        "location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        ",,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("cai.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+@pytest.fixture
+def cai_challenges_file_with_extra_non_trailing_columns(temp_dir):
+    csv_content = (
+        "pk_column,content_hash,challenge,challenge_type,challenger,category_code,"
+        "disposition,challenge_explanation,type,entity_name,entity_number,CMS number,"
+        "frn,location_id,address_primary,city,state,zip_code,longitude,latitude,"
+        "explanation,need,availability\n"
+        ",,,,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("cai_challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines)
+    return file_path
+
+
+def test_BEADChallengeDataValidator_with_files_with_extra_non_trailing_columns(
+    temp_dir,
+    challengers_file_with_extra_non_trailing_columns,
+    challenges_file_with_extra_non_trailing_columns,
+    cai_file_with_extra_non_trailing_columns,
+    cai_challenges_file_with_extra_non_trailing_columns,
+    post_challenge_cai_file_with_extra_non_trailing_columns,
+):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    misc_issues = [
+        i for i in bcdv.issues if i["issue_type"] == "column_dtype_validation_misc"
+    ]
+    col_name_issues = [
+        i for i in bcdv.issues if i["issue_type"] == "column_name_validation"
     ]
     assert len(misc_issues) == 0
     assert len(col_name_issues) == 5
@@ -676,7 +767,7 @@ def test_challenger__column_names():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "00_column_name_validation"
+            if i["issue_type"] == "column_name_validation"
         ]
         assert len(test_issues) == 1
         assert list(test_issues[0].keys()) == [
@@ -718,7 +809,7 @@ def test_challenger__column_order():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "01_column_order_validation"
+            if i["issue_type"] == "column_order_validation"
         ]
         assert len(test_issues) == 1
         cols_out_of_order = test_issues[0]["cols_out_of_order"]
@@ -1081,7 +1172,7 @@ def test_challenges__column_names():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "00_column_name_validation"
+            if i["issue_type"] == "column_name_validation"
         ]
         assert len(test_issues) == 1
         assert list(test_issues[0].keys()) == [
@@ -1113,7 +1204,7 @@ def test_challenges__column_order():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "01_column_order_validation"
+            if i["issue_type"] == "column_order_validation"
         ]
         assert len(test_issues) == len(file_col_names_in_wrong_place)
         assert set(el["column_name_in_file"] for el in test_issues) == set(
@@ -1156,7 +1247,7 @@ def test_challenges__column_order():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "01_column_order_validation"
+            if i["issue_type"] == "column_order_validation"
         ]
         assert len(test_issues) == 1
         cols_out_of_order = test_issues[0]["cols_out_of_order"]
@@ -1225,7 +1316,7 @@ def test_challenges_column_dtypes__technology():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -1263,7 +1354,7 @@ def test_challenges_column_dtypes__location_id():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -1301,7 +1392,7 @@ def test_challenges_column_dtypes__advertised_download_speed():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -1339,7 +1430,7 @@ def test_challenges_column_dtypes__download_speed():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -1377,7 +1468,7 @@ def test_challenges_column_dtypes__advertised_upload_speed():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -1415,7 +1506,7 @@ def test_challenges_column_dtypes__upload_speed():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -1453,7 +1544,7 @@ def test_challenges_column_dtypes__latency():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -2947,7 +3038,7 @@ def test_cai__column_names():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "00_column_name_validation"
+            if i["issue_type"] == "column_name_validation"
         ]
         assert len(test_issues) == 1
         assert list(test_issues[0].keys()) == [
@@ -2986,7 +3077,7 @@ def test_cai__column_order():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "01_column_order_validation"
+            if i["issue_type"] == "column_order_validation"
         ]
         assert len(test_issues) == 1
         cols_out_of_order = test_issues[0]["cols_out_of_order"]
@@ -3043,7 +3134,7 @@ def test_cai_column_dtypes__entity_number():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -3077,7 +3168,7 @@ def test_cai_column_dtypes__location_id():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -3112,7 +3203,7 @@ def test_cai_column_dtypes__need():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -3147,7 +3238,7 @@ def test_cai_column_dtypes__availability():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -3761,7 +3852,7 @@ def test_cai_challenges__column_names():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "00_column_name_validation"
+            if i["issue_type"] == "column_name_validation"
         ]
         assert len(test_issues) == 1
         assert list(test_issues[0].keys()) == [
@@ -3805,7 +3896,7 @@ def test_cai_challenges__column_order():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "01_column_order_validation"
+            if i["issue_type"] == "column_order_validation"
         ]
 
         assert len(test_issues) == 1
@@ -3866,7 +3957,7 @@ def test_cai_challenges_column_dtypes__entity_number():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -3902,7 +3993,7 @@ def test_cai_challenges_column_dtypes__location_id():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -3940,7 +4031,7 @@ def test_cai_challenges_column_dtypes__need():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -3978,7 +4069,7 @@ def test_cai_challenges_column_dtypes__availability():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -4715,7 +4806,7 @@ def test_post_challenge_location__column_names():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "00_column_name_validation"
+            if i["issue_type"] == "column_name_validation"
         ]
         assert len(test_issues) == 1
         assert list(test_issues[0].keys()) == [
@@ -4745,7 +4836,7 @@ def test_post_challenge_location__column_order():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "01_column_order_validation"
+            if i["issue_type"] == "column_order_validation"
         ]
         assert len(test_issues) == 1
         cols_out_of_order = test_issues[0]["cols_out_of_order"]
@@ -4801,7 +4892,7 @@ def test_post_challenge_location_column_dtypes__location_id():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -4834,7 +4925,7 @@ def test_post_challenge_location_column_dtypes__classification():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -4939,7 +5030,7 @@ def test_post_challenge_cai__column_names():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "00_column_name_validation"
+            if i["issue_type"] == "column_name_validation"
         ]
         assert len(test_issues) == 1
         assert list(test_issues[0].keys()) == [
@@ -4986,7 +5077,7 @@ def test_post_challenge_cai__column_order():
         test_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "01_column_order_validation"
+            if i["issue_type"] == "column_order_validation"
         ]
         assert len(test_issues) == 1
         cols_out_of_order = test_issues[0]["cols_out_of_order"]
@@ -5043,7 +5134,7 @@ def test_post_challenge_cai_column_dtypes__entity_number():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -5077,7 +5168,7 @@ def test_post_challenge_cai_column_dtypes__location_id():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -5112,7 +5203,7 @@ def test_post_challenge_cai_column_dtypes__need():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -5147,7 +5238,7 @@ def test_post_challenge_cai_column_dtypes__availability():
         col_dtype_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -5808,7 +5899,7 @@ def test_unserved_column_dtypes__location_id():
         col_contents_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
@@ -5884,7 +5975,7 @@ def test_underserved_column_dtypes__location_id():
         col_contents_issues = [
             i["issue_details"]
             for i in issues
-            if i["issue_type"] == "03_column_dtype_validation"
+            if i["issue_type"] == "column_dtype_validation"
         ]
         row_fails = [
             i["failing_rows_and_values"]
