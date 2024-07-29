@@ -26,16 +26,16 @@ class CSVData:
     def detect_bom(self, file_name: Path) -> str:
         with open(file_name, "rb") as f:
             raw_bytes = f.read(4)
-            if raw_bytes.startswith(b"\xef\xbb\xbf"):
-                return "utf-8-sig"
-            elif raw_bytes.startswith(b"\xff\xfe\x00\x00"):
-                return "utf-32le"
+            if raw_bytes.startswith(b"\xff\xfe\x00\x00"):
+                return "utf-32-le"
             elif raw_bytes.startswith(b"\x00\x00\xfe\xff"):
-                return "utf-32be"
+                return "utf-32-be"
             elif raw_bytes.startswith(b"\xff\xfe"):
-                return "utf-16le"
+                return "utf-16-le"
             elif raw_bytes.startswith(b"\xfe\xff"):
-                return "utf-16be"
+                return "utf-16-be"
+            elif raw_bytes.startswith(b"\xef\xbb\xbf"):
+                return "utf-8-sig"
             else:
                 return None
 
@@ -43,18 +43,18 @@ class CSVData:
         self,
         file_name: Path,
         encodings: Tuple = (
-            "utf-32",
-            "utf-16",
             "utf-8",
+            "utf-16",
+            "utf-32",
+            "cp1252",
             "latin1",
             "iso-8859-1",
             "ascii",
-            "cp1252",
         ),
     ) -> str:
         bom_encoding = self.detect_bom(file_name)
         if bom_encoding is not None:
-            return bom_encoding
+            encodings = [bom_encoding, *encodings]
         for encoding in encodings:
             try:
                 with open(file_name, encoding=encoding) as f:
@@ -70,19 +70,24 @@ class CSVData:
           indices.
         """
         encoding = self.detect_encoding(file_name)
-        with open(file_name, mode="r", newline="", encoding=encoding) as file:
-            csv_reader = csv.reader(file)
-            self._set_header(csv_reader)
-            try:
-                for index, row in enumerate(csv_reader):
-                    self.data.append([index] + row)
-            except Exception:
-                print(
-                    f"Encountered an error while tring to read in file\n  {file_name}\n"
-                )
-                print(f"specifically while reading the line after row number {index}.")
-                print(f"row contents: {row}")
-                raise
+        with open(file_name, mode="rb") as file:
+            raw_data = file.read()
+        if encoding in ("utf-16-le", "utf-16-be", "utf-32-le", "utf-32-be"):
+            if encoding in ["utf-16-be", "utf-16-le"]:
+                raw_data = raw_data[2:]
+            elif encoding in ["utf-32-be", "utf-32-le"]:
+                raw_data = raw_data[4:]
+        decoded_data = raw_data.decode(encoding)
+        csv_reader = csv.reader(decoded_data.splitlines())
+        self._set_header(csv_reader)
+        try:
+            for index, row in enumerate(csv_reader):
+                self.data.append([index] + row)
+        except Exception:
+            print(f"Encountered an error while tring to read in file\n  {file_name}\n")
+            print(f"specifically while reading the line after row number {index}.")
+            print(f"row contents: {row}")
+            raise
 
     def _set_header(self, csv_reader) -> None:
         if len(self.header) == 0:

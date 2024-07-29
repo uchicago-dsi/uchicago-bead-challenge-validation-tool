@@ -252,9 +252,15 @@ def test_BEADChallengeDataValidator_with_files_with_ufeff_bom_char(temp_dir):
     create_csv_file(file_path, csv_lines, encoding="utf-8", bom="\ufeff")
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     assert bcdv.issues != []
+    assert (
+        bcdv.data_format_validators["challenges"].file_validator.csv_data_object.header[
+            1
+        ]
+        == "challenge"
+    )
 
 
-def test_BEADChallengeDataValidator_with_files_with_ufffe_bom_char(temp_dir):
+def test_BEADChallengeDataValidator_with_files_with_utf_8_sig_bom_char(temp_dir):
     csv_content = (
         "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
         "resolution_date,disposition,provider_id,technology,location_id,unit,"
@@ -264,13 +270,19 @@ def test_BEADChallengeDataValidator_with_files_with_ufffe_bom_char(temp_dir):
         "2,,,,,,,,,,,,,,,,,,,\n"
     )
     file_path = temp_dir.join("challenges.csv")
-    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
-    create_csv_file(file_path, csv_lines, encoding="utf-16", bom="\ufffe")
+    with open(file_path, "w", encoding="utf-8-sig") as f:
+        f.write(csv_content)
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     assert bcdv.issues != []
+    assert (
+        bcdv.data_format_validators["challenges"].file_validator.csv_data_object.header[
+            1
+        ]
+        == "challenge"
+    )
 
 
-def test_BEADChallengeDataValidator_with_files_with_ufffe0000_bom_char(temp_dir):
+def test_BEADChallengeDataValidator_with_files_with_utf_16_le_bom_char(temp_dir):
     csv_content = (
         "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
         "resolution_date,disposition,provider_id,technology,location_id,unit,"
@@ -280,13 +292,20 @@ def test_BEADChallengeDataValidator_with_files_with_ufffe0000_bom_char(temp_dir)
         "2,,,,,,,,,,,,,,,,,,,\n"
     )
     file_path = temp_dir.join("challenges.csv")
-    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
-    create_csv_file(file_path, csv_lines, encoding="utf-32", bom="\ufffe0000")
+    with open(file_path, "wb") as f:
+        f.write(b"\xff\xfe")
+        f.write(csv_content.encode("utf-16-le"))
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     assert bcdv.issues != []
+    assert (
+        bcdv.data_format_validators["challenges"].file_validator.csv_data_object.header[
+            1
+        ]
+        == "challenge"
+    )
 
 
-def test_BEADChallengeDataValidator_with_files_with_u0000feff_bom_char(temp_dir):
+def test_BEADChallengeDataValidator_with_files_with_utf_16_be_bom_char(temp_dir):
     csv_content = (
         "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
         "resolution_date,disposition,provider_id,technology,location_id,unit,"
@@ -296,10 +315,63 @@ def test_BEADChallengeDataValidator_with_files_with_u0000feff_bom_char(temp_dir)
         "2,,,,,,,,,,,,,,,,,,,\n"
     )
     file_path = temp_dir.join("challenges.csv")
-    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
-    create_csv_file(file_path, csv_lines, encoding="utf-32", bom="\u0000feff")
+    with open(file_path, "wb") as f:
+        f.write(b"\xfe\xff")
+        f.write(csv_content.encode("utf-16-be"))
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     assert bcdv.issues != []
+    assert (
+        bcdv.data_format_validators["challenges"].file_validator.csv_data_object.header[
+            1
+        ]
+        == "challenge"
+    )
+
+
+def test_BEADChallengeDataValidator_with_files_with_utf_32_le_bom_char(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    with open(file_path, "wb") as f:
+        f.write(b"\xff\xfe\x00\x00")
+        f.write(csv_content.encode("utf-32-le"))
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+    assert (
+        bcdv.data_format_validators["challenges"].file_validator.csv_data_object.header[
+            1
+        ]
+        == "challenge"
+    )
+
+
+def test_BEADChallengeDataValidator_with_files_with_utf_32_be_bom_char(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    with open(file_path, "wb") as f:
+        f.write(b"\x00\x00\xfe\xff")
+        f.write(csv_content.encode("utf-32-be"))
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+    assert (
+        bcdv.data_format_validators["challenges"].file_validator.csv_data_object.header[
+            1
+        ]
+        == "challenge"
+    )
 
 
 #########################################################
