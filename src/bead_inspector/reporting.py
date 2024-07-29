@@ -112,7 +112,7 @@ class ReportGenerator:
                 " To overwrite that file, run the ReportGenerator.write_report"
                 " method with the overwrite arg set to True."
             )
-        with open(self.report_file_path, "w") as f:
+        with open(self.report_file_path, "w", encoding="utf-8") as f:
             f.write(self.final_report)
         print(
             "Data Validation Report written to file:\n  - " f"{self.report_file_path}"

@@ -1,6 +1,8 @@
 import csv
+from pathlib import Path
 import pytest
 import tempfile
+from typing import Optional
 
 from bead_inspector import validator
 
@@ -10,8 +12,12 @@ def temp_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("data")
 
 
-def create_csv_file(file_path, csv_data: str, encoding: str = "utf-8"):
+def create_csv_file(
+    file_path: Path, csv_data: str, encoding: str = "utf-8", bom: Optional[str] = None
+) -> None:
     with open(file_path, "w+", newline="", encoding=encoding) as csvfile:
+        if bom is not None:
+            csvfile.write(bom)
         writer = csv.writer(csvfile)
         writer.writerows(csv_data)
 
@@ -225,6 +231,73 @@ def test_BEADChallengeDataValidator_with_files_encoded_in_iso_8859_1(
     temp_dir,
     challenges_file_with_iso_8859_1_chars,
 ):
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+# BOM checks
+
+
+def test_BEADChallengeDataValidator_with_files_with_ufeff_bom_char(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="utf-8", bom="\ufeff")
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+def test_BEADChallengeDataValidator_with_files_with_ufffe_bom_char(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="utf-16", bom="\ufffe")
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+def test_BEADChallengeDataValidator_with_files_with_ufffe0000_bom_char(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="utf-32", bom="\ufffe0000")
+    bcdv = validator.BEADChallengeDataValidator(temp_dir)
+    assert bcdv.issues != []
+
+
+def test_BEADChallengeDataValidator_with_files_with_u0000feff_bom_char(temp_dir):
+    csv_content = (
+        "challenge,challenge_type,challenger,challenge_date,rebuttal_date,"
+        "resolution_date,disposition,provider_id,technology,location_id,unit,"
+        "reason_code,evidence_file_id,response_file_id,resolution,"
+        "advertised_download_speed,download_speed,advertised_upload_speed,"
+        "upload_speed,latency\n"
+        "2,,,,,,,,,,,,,,,,,,,\n"
+    )
+    file_path = temp_dir.join("challenges.csv")
+    csv_lines = [line.split(",") for line in csv_content.split("\n") if line]
+    create_csv_file(file_path, csv_lines, encoding="utf-32", bom="\u0000feff")
     bcdv = validator.BEADChallengeDataValidator(temp_dir)
     assert bcdv.issues != []
 

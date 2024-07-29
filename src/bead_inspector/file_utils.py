@@ -23,18 +23,38 @@ class CSVData:
         self.data = []
         self.load_file(self.file_name)
 
+    def detect_bom(self, file_name: Path) -> str:
+        with open(file_name, "rb") as f:
+            raw_bytes = f.read(4)
+            if raw_bytes.startswith(b"\xef\xbb\xbf"):
+                return "utf-8-sig"
+            elif raw_bytes.startswith(b"\xff\xfe\x00\x00"):
+                return "utf-32le"
+            elif raw_bytes.startswith(b"\x00\x00\xfe\xff"):
+                return "utf-32be"
+            elif raw_bytes.startswith(b"\xff\xfe"):
+                return "utf-16le"
+            elif raw_bytes.startswith(b"\xfe\xff"):
+                return "utf-16be"
+            else:
+                return None
+
     def detect_encoding(
         self,
         file_name: Path,
         encodings: Tuple = (
+            "utf-32",
+            "utf-16",
             "utf-8",
             "latin1",
-            "utf-16",
             "iso-8859-1",
             "ascii",
             "cp1252",
         ),
     ) -> str:
+        bom_encoding = self.detect_bom(file_name)
+        if bom_encoding is not None:
+            return bom_encoding
         for encoding in encodings:
             try:
                 with open(file_name, encoding=encoding) as f:
