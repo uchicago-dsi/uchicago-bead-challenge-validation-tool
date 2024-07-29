@@ -3,6 +3,7 @@ import datetime as dt
 import json
 from itertools import zip_longest
 from pathlib import Path
+import re
 from typing import Any, Dict, List, Optional, Union
 
 from bead_inspector import constants, rules
@@ -124,7 +125,7 @@ class SingleFileValidator:
             self.issues.append(
                 {
                     "data_format": self.data_format,
-                    "issue_type": "column_name_validation",
+                    "issue_type": "00_column_name_validation",
                     "issue_level": "error",
                     "issue_details": {
                         "columns_missing_from_file": list(missing_cols),
@@ -144,7 +145,9 @@ class SingleFileValidator:
                 cols_out_of_order.append(
                     {
                         "column_number": i,
-                        "expected_column_name": exp_col,
+                        "expected_column_name": re.sub(
+                            "^<missing_column>$", "<no_column_expected_here>", exp_col
+                        ),
                         "column_name_in_file": file_col,
                     }
                 )
@@ -152,7 +155,7 @@ class SingleFileValidator:
             self.issues.append(
                 {
                     "data_format": self.data_format,
-                    "issue_type": "column_order_validation",
+                    "issue_type": "01_column_order_validation",
                     "issue_level": "error",
                     "issue_details": {"cols_out_of_order": cols_out_of_order},
                 }
@@ -172,11 +175,12 @@ class SingleFileValidator:
                 self.issues.append(
                     {
                         "data_format": self.data_format,
-                        "issue_type": "column_dtype_undefined",
+                        "issue_type": "02_unexpected_column_found",
                         "issue_level": "error",
                         "issue_details": {"column": column},
                     }
                 )
+                valid_column_type = str
             num_dtype_errors = 0
             num_cols_in_row_errors = 0
             dtype_failing_rows = []
@@ -230,7 +234,7 @@ class SingleFileValidator:
                 self.issues.append(
                     {
                         "data_format": self.data_format,
-                        "issue_type": "column_dtype_validation",
+                        "issue_type": "03_column_dtype_validation",
                         "issue_level": "error",
                         "issue_details": {
                             "column": column,
@@ -271,7 +275,10 @@ class SingleFileValidator:
 
     def validate_column_non_nullness(self) -> None:
         for i, column in enumerate(self.csv_data_object.header):
-            if column in self.nullable_columns:
+            if (
+                column in self.nullable_columns
+                or column not in self.column_dtypes.keys()
+            ):
                 continue
             rows_w_null_col_val = []
             num_null = 0
@@ -1091,7 +1098,9 @@ class BEADChallengeDataValidator:
         if self.issue_logs_dir is None:
             print(self.issues)
         else:
-            self.issues = sorted(self.issues, key=lambda x: x["issue_level"])
+            self.issues = sorted(
+                self.issues, key=lambda x: (x["issue_level"], x["issue_type"])
+            )
             write_issues_to_json(issues=self.issues, file_path=self.log_path)
         print(f"Number of issues (or types of issues) found: {len(self.issues)}")
 

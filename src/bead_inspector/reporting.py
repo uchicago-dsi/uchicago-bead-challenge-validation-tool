@@ -359,7 +359,7 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "column_dtype_validation"
+        assert issue_type == "03_column_dtype_validation"
         expected_file_name = f"{data_format}.csv"
         column = issue_details["column"]
         id_column = issue_details["id_column"]
@@ -484,7 +484,7 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "column_name_validation"
+        assert issue_type == "00_column_name_validation"
         expected_file_name = f"{data_format}.csv"
         missing_cols = issue_details["columns_missing_from_file"]
         extra_cols = issue_details["extra_columns_in_file"]
@@ -529,7 +529,7 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "column_order_validation"
+        assert issue_type == "01_column_order_validation"
         expected_file_name = f"{data_format}.csv"
         cols_out_of_order = issue_details["cols_out_of_order"]
         toc_descr = f"{expected_file_name} :: Incorrect column order"
@@ -544,7 +544,7 @@ class ReportGenerator:
         )
         return (toc_descr, html_output)
 
-    def _format_column_dtype_undefined_issue(
+    def _format_unexpected_column_found_issue(
         self, issue: Dict, issue_number: int
     ) -> Tuple[str, str]:
         (
@@ -553,18 +553,18 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "column_dtype_undefined"
+        assert issue_type == "02_unexpected_column_found"
         expected_file_name = f"{data_format}.csv"
         column = issue_details["column"]
-        toc_descr = f"{expected_file_name} :: Undefined datatype for column '{column}'"
+        toc_descr = f"{expected_file_name} :: Unexpected column ('{column}') found"
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
-            f"{toc_descr}</h3>{self.LINK_TO_TOC}\n"
+            f"{toc_descr}</h3>{self.LINK_TO_TOC}"
             f"<ul><li>Data File: {expected_file_name}</li>"
             f"<li>Issue Level: {issue_level}</li>"
-            "<li>Description: A datatype must be defined for every "
-            "column.</li>"
-            "</ul>\n"
+            "<li>Description: Columns must have the expected names and be in the "
+            "expected order.</li>"
+            "</ul>"
         )
         return (toc_descr, html_output)
 
@@ -741,22 +741,22 @@ class ReportGenerator:
             toc_line, formatted_issue = self._format_data_loading_failure_issue(
                 issue, issue_number
             )
-        elif issue_type == "column_name_validation":
+        elif issue_type == "00_column_name_validation":
             (
                 toc_line,
                 formatted_issue,
             ) = self._format_column_name_validation_issue(issue, issue_number)
-        elif issue_type == "column_order_validation":
+        elif issue_type == "01_column_order_validation":
             (
                 toc_line,
                 formatted_issue,
             ) = self._format_column_order_validation_issue(issue, issue_number)
-        elif issue_type == "column_dtype_undefined":
+        elif issue_type == "02_unexpected_column_found":
             (
                 toc_line,
                 formatted_issue,
-            ) = self._format_column_dtype_undefined_issue(issue, issue_number)
-        elif issue_type == "column_dtype_validation":
+            ) = self._format_unexpected_column_found_issue(issue, issue_number)
+        elif issue_type == "03_column_dtype_validation":
             (
                 toc_line,
                 formatted_issue,
