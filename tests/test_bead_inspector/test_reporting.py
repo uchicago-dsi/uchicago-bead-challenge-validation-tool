@@ -17,6 +17,7 @@ def issue_log_file_with_column_dtype_validation_misc_issue(temp_dir):
             "data_format": "challenges",
             "issue_type": "column_dtype_validation_misc",
             "issue_level": "error",
+            "issue_sort_order": 4,
             "issue_details": {
                 "row_number": 2,
                 "column": "download_speed",

@@ -479,10 +479,10 @@ class CaiChallengeFRNGivenType(PostChallengeCaiFRNValidationGivenCAIType):
 
 class PostChallengeCaiLocationValidation:
     rule_descr = (
-        "Every CAI must have (at least) one of:"
-        "1. Lat/Long, Location ID"
-        "2. address_primary, city, and zip_code"
-        "3. location_id"
+        "Every CAI must have (at least) one complete non-null set of: "
+        "1. [Latitude and Longitude], "
+        "2. [address_primary, city, and zip_code], or "
+        "3. [location_id]"
     )
     short_descr = "Required location-identifying sets of values all missing"
     location_id_index: int = 6

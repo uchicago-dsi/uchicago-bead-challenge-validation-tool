@@ -135,7 +135,12 @@ class ReportGenerator:
         self.issues = self._read_issues_from_file(self.issues_file_path)
         self.issues = sorted(
             self.issues,
-            key=lambda x: (x["issue_level"], x["data_format"], x["issue_type"]),
+            key=lambda x: (
+                x["issue_level"],
+                x["data_format"],
+                x["issue_sort_order"],
+                x["issue_type"],
+            ),
         )
 
     def _get_class_attributes(self, module_name: str, class_name: str) -> Dict:
@@ -544,7 +549,7 @@ class ReportGenerator:
         )
         return (toc_descr, html_output)
 
-    def _format_column_dtype_undefined_issue(
+    def _format_unexpected_column_found_issue(
         self, issue: Dict, issue_number: int
     ) -> Tuple[str, str]:
         (
@@ -553,18 +558,18 @@ class ReportGenerator:
             issue_level,
             issue_details,
         ) = self._unpack_core_issue_fields(issue)
-        assert issue_type == "column_dtype_undefined"
+        assert issue_type == "unexpected_column_found"
         expected_file_name = f"{data_format}.csv"
         column = issue_details["column"]
-        toc_descr = f"{expected_file_name} :: Undefined datatype for column '{column}'"
+        toc_descr = f"{expected_file_name} :: Unexpected column ('{column}') found"
         html_output = (
             f'<h3 id="issue-{issue_number}">{issue_number}. '
-            f"{toc_descr}</h3>{self.LINK_TO_TOC}\n"
+            f"{toc_descr}</h3>{self.LINK_TO_TOC}"
             f"<ul><li>Data File: {expected_file_name}</li>"
             f"<li>Issue Level: {issue_level}</li>"
-            "<li>Description: A datatype must be defined for every "
-            "column.</li>"
-            "</ul>\n"
+            "<li>Description: Columns must have the expected names and be in the "
+            "expected order.</li>"
+            "</ul>"
         )
         return (toc_descr, html_output)
 
@@ -751,11 +756,11 @@ class ReportGenerator:
                 toc_line,
                 formatted_issue,
             ) = self._format_column_order_validation_issue(issue, issue_number)
-        elif issue_type == "column_dtype_undefined":
+        elif issue_type == "unexpected_column_found":
             (
                 toc_line,
                 formatted_issue,
-            ) = self._format_column_dtype_undefined_issue(issue, issue_number)
+            ) = self._format_unexpected_column_found_issue(issue, issue_number)
         elif issue_type == "column_dtype_validation":
             (
                 toc_line,
