@@ -27,11 +27,11 @@ class CSVData:
         with open(file_name, "rb") as f:
             raw_bytes = f.read(4)
             if raw_bytes.startswith(b"\xff\xfe\x00\x00"):
-                return "utf-32"
+                return "utf-32-le"
             elif raw_bytes.startswith(b"\x00\x00\xfe\xff"):
                 return "utf-32-be"
             elif raw_bytes.startswith(b"\xff\xfe"):
-                return "utf-16"
+                return "utf-16-le"
             elif raw_bytes.startswith(b"\xfe\xff"):
                 return "utf-16-be"
             elif raw_bytes.startswith(b"\xef\xbb\xbf"):
@@ -72,16 +72,13 @@ class CSVData:
         encoding = self.detect_encoding(file_name)
         with open(file_name, mode="rb") as file:
             raw_data = file.read()
-        if encoding in ("utf-16-be", "utf-32-be"):
-            # Remove BOM for BE encodings
-            if encoding == "utf-16-be":
+        if encoding in ("utf-16-le", "utf-16-be", "utf-32-le", "utf-32-be"):
+            if encoding in ["utf-16-be", "utf-16-le"]:
                 raw_data = raw_data[2:]
-            elif encoding == "utf-32-be":
+            elif encoding in ["utf-32-be", "utf-32-le"]:
                 raw_data = raw_data[4:]
-        # with open(file_name, mode="r", newline="", encoding=encoding) as file:
         decoded_data = raw_data.decode(encoding)
         csv_reader = csv.reader(decoded_data.splitlines())
-        # csv_reader = csv.reader(file)
         self._set_header(csv_reader)
         try:
             for index, row in enumerate(csv_reader):
