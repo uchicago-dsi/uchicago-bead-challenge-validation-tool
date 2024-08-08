@@ -1,13 +1,14 @@
 <br/><br/>
-<p align="center">
-<img src="https://raw.githubusercontent.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/main/images/DSILogo.png" alt="UChicago Logo" width="600"/>
-</p>
+<div style="display: flex; align-items: center; justify-content: center;">
+    <img src="https://raw.githubusercontent.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/main/images/DSILogo.png" alt="UChicago DSI Logo" style="width: 60%; height: auto; vertical-align: middle; margin-left: 2%;">
+    <img src="https://raw.githubusercontent.com/uchicago-dsi/uchicago-bead-challenge-validation-tool/main/images/IEILogo.svg" alt="IEI Logo" style="width: 36%; height: auto; vertical-align: middle; margin-right: 2%;">
+</div>
 <br/><br/>
 
 # BEAD INSPECTOR
 
 
-Welcome to the BEAD Inspector, presented by the [University of Chicago's Data Science Institute](https://datascience.uchicago.edu/).
+Welcome to the BEAD Inspector, presented by the University of Chicago's [Data Science Institute](https://datascience.uchicago.edu/) and [Internet Equity Initiative](https://internetequity.uchicago.edu/).
 
 As part of the NTIA BEAD Challenge process, eligible entities are required to submit a specific set of data deliverables to the NTIA. The purpose of this package is to validate NTIA BEAD challenge process data (against the [official specification](https://www.ntia.gov/sites/default/files/2023-11/bead_challenge_process_policy_notice.pdf#page=23) and Notices of Changes to Process) and provide feedback that helps Eligible Entities identify errors in their submittable CSVs.
 
@@ -40,7 +41,9 @@ This package focuses on a set of data quality issues that are easy to overlook w
 | challenges.csv |
 | cai_challenges.csv |
 | post_challenge_locations.csv |
-| post_challenge_cai.csv
+| post_challenge_cai.csv |
+| unserved.csv |
+| underserved.csv |
 </th>
 
 <!-- There are three specific types of errors that it will identify: -->
